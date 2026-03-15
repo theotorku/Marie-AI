@@ -42,21 +42,37 @@ export function useBilling(token: string | null) {
   }, [token]);
 
   const upgrade = useCallback(async () => {
-    const res = await fetch("/api/billing/checkout", {
-      method: "POST",
-      headers: { ...headers, "Content-Type": "application/json" },
-    });
-    const data = await res.json();
-    if (data.url) window.open(data.url, "_blank");
+    try {
+      const res = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Failed to start checkout. Please try again.");
+      }
+    } catch {
+      alert("Unable to connect to billing. Please try again.");
+    }
   }, [token]);
 
   const manage = useCallback(async () => {
-    const res = await fetch("/api/billing/portal", {
-      method: "POST",
-      headers: { ...headers, "Content-Type": "application/json" },
-    });
-    const data = await res.json();
-    if (data.url) window.open(data.url, "_blank");
+    try {
+      const res = await fetch("/api/billing/portal", {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Failed to open billing portal. Please try again.");
+      }
+    } catch {
+      alert("Unable to connect to billing. Please try again.");
+    }
   }, [token]);
 
   const refresh = useCallback(async () => {

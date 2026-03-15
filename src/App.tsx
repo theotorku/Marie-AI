@@ -24,23 +24,6 @@ export default function App() {
   const taskStore = useTasks(auth.token);
   const billing = useBilling(auth.token);
 
-  if (auth.loading) {
-    return (
-      <div style={{
-        minHeight: "100vh",
-        background: "linear-gradient(160deg, #1A1611 0%, #0D0B09 40%, #14110E 100%)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontFamily: "'DM Sans', sans-serif", color: "#C4973B",
-      }}>
-        Loading...
-      </div>
-    );
-  }
-
-  if (!auth.user) {
-    return <AuthScreen onLogin={auth.login} onRegister={auth.register} />;
-  }
-
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [input, setInput] = useState("");
   const [newTask, setNewTask] = useState("");
@@ -58,6 +41,23 @@ export default function App() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  if (auth.loading) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        background: "linear-gradient(160deg, #1A1611 0%, #0D0B09 40%, #14110E 100%)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontFamily: "'DM Sans', sans-serif", color: "#C4973B",
+      }}>
+        Loading...
+      </div>
+    );
+  }
+
+  if (!auth.user) {
+    return <AuthScreen onLogin={auth.login} onRegister={auth.register} />;
+  }
 
   const handleSend = (text: string) => {
     sendMessage(text);
