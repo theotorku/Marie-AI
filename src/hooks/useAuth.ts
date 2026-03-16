@@ -4,6 +4,7 @@ interface User {
   id: string;
   email: string;
   name: string;
+  onboarding_completed?: boolean;
 }
 
 interface AuthState {

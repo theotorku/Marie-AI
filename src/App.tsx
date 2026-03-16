@@ -20,6 +20,8 @@ import SettingsTab from "./components/SettingsTab";
 import TemplatesTab from "./components/TemplatesTab";
 import AnalyticsTab from "./components/AnalyticsTab";
 import CRMTab from "./components/CRMTab";
+import Onboarding from "./components/Onboarding";
+import { exportPDF } from "./components/PDFExport";
 import { useCRM } from "./hooks/useCRM";
 import { useSlack } from "./hooks/useSlack";
 import { useTemplates } from "./hooks/useTemplates";
@@ -95,6 +97,16 @@ export default function App() {
     return <AuthScreen onLogin={auth.login} onRegister={auth.register} />;
   }
 
+  const showOnboarding = auth.user && !auth.user.onboarding_completed;
+  const completeOnboarding = async () => {
+    await fetch("/api/auth/onboarding-complete", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
+    // Update local user state
+    auth.user!.onboarding_completed = true;
+  };
+
   const handleSend = (text: string) => {
     sendMessage(text);
     setInput("");
@@ -122,6 +134,20 @@ export default function App() {
     if (a.done !== b.done) return a.done ? 1 : -1;
     return p[a.priority] - p[b.priority];
   });
+
+  if (showOnboarding) {
+    return (
+      <Onboarding
+        userName={auth.user.name}
+        tier={billing.tier}
+        googleConnected={google.connected}
+        onConnectGoogle={google.connect}
+        onUpgrade={billing.upgrade}
+        onComplete={completeOnboarding}
+        onSendMessage={(msg) => { sendMessage(msg); completeOnboarding(); }}
+      />
+    );
+  }
 
   return (
     <div
@@ -418,6 +444,26 @@ export default function App() {
                     </button>
                   ))}
                 </div>
+              </div>
+              <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                <button
+                  onClick={() => exportPDF({ products: filteredProducts, type: "sell-sheet" })}
+                  style={{
+                    padding: "8px 16px", borderRadius: 8,
+                    border: "1px solid rgba(196,151,59,0.25)", background: "rgba(196,151,59,0.08)",
+                    color: "#C4973B", fontSize: 11, fontWeight: 600, cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em",
+                  }}
+                >Export Sell Sheet</button>
+                <button
+                  onClick={() => exportPDF({ products: PRODUCT_KB, type: "line-sheet" })}
+                  style={{
+                    padding: "8px 16px", borderRadius: 8,
+                    border: "1px solid rgba(196,151,59,0.25)", background: "rgba(196,151,59,0.08)",
+                    color: "#C4973B", fontSize: 11, fontWeight: 600, cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em",
+                  }}
+                >Export Line Sheet</button>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
                 {filteredProducts.map((p, i) => (

@@ -98,11 +98,17 @@ app.get("/api/auth/me", authenticateToken, async (req, res) => {
   const db = getDb();
   const { data } = await db
     .from("users")
-    .select("id, email, name, tier")
+    .select("id, email, name, tier, onboarding_completed")
     .eq("id", req.user.id)
     .single();
   if (!data) return res.status(404).json({ error: "User not found." });
   res.json({ user: data });
+});
+
+app.post("/api/auth/onboarding-complete", authenticateToken, async (req, res) => {
+  const db = getDb();
+  await db.from("users").update({ onboarding_completed: true }).eq("id", req.user.id);
+  res.json({ ok: true });
 });
 
 // ── Google OAuth (protected) ─────────────────────────────────────────────────

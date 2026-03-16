@@ -131,13 +131,34 @@ export async function generateDailyBriefing(userId) {
 
     const unreadEmails = emails.filter((e) => e.unread);
 
+    // CRM context — stale contacts and pipeline summary
+    const { data: contacts } = await db
+      .from("contacts")
+      .select("name, company, stage, last_contacted_at")
+      .eq("user_id", userId);
+
+    const contactList = contacts || [];
+    const staleThreshold = 14; // days
+    const staleContacts = contactList.filter((c) => {
+      if (!c.last_contacted_at) return true;
+      const days = Math.floor((Date.now() - new Date(c.last_contacted_at).getTime()) / 86400000);
+      return days >= staleThreshold && c.stage !== "closed" && c.stage !== "lost";
+    });
+
+    const pipelineSummary = {};
+    for (const c of contactList) {
+      pipelineSummary[c.stage] = (pipelineSummary[c.stage] || 0) + 1;
+    }
+
     const context = {
       tasks: tasks || [],
       unreadEmails: unreadEmails.map((e) => ({ from: e.from, subject: e.subject })),
       todayEvents: events.map((e) => ({ summary: e.summary, start: e.start, attendees: e.attendees })),
+      staleContacts,
+      pipelineSummary,
     };
 
-    const systemPrompt = `You are Marie AI, a proactive assistant for beauty industry professionals. Generate a concise, actionable daily briefing. Use a warm, professional tone. Structure it with clear sections. Keep it under 300 words.`;
+    const systemPrompt = `You are Marie AI, a proactive assistant for beauty industry professionals. Generate a concise, actionable daily briefing. Use a warm, professional tone. Structure it with clear sections. Include CRM insights if there are contacts needing attention. Keep it under 350 words.`;
 
     const userPrompt = `Generate my morning briefing for ${new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}.
 
@@ -145,6 +166,8 @@ Here's my current status:
 - Open tasks (${context.tasks.length}): ${context.tasks.map((t) => `[${t.priority}] ${t.text}`).join("; ") || "None"}
 - Unread emails (${context.unreadEmails.length}): ${context.unreadEmails.map((e) => `From ${e.from}: "${e.subject}"`).join("; ") || "None"}
 - Today's meetings (${context.todayEvents.length}): ${context.todayEvents.map((e) => `${e.summary} at ${e.start}${e.attendees?.length ? ` with ${e.attendees.join(", ")}` : ""}`).join("; ") || "None"}
+- Pipeline: ${Object.entries(context.pipelineSummary).map(([stage, count]) => `${count} ${stage}`).join(", ") || "No contacts yet"}
+- Contacts needing attention (${staleContacts.length}): ${staleContacts.slice(0, 5).map((c) => `${c.name}${c.company ? ` at ${c.company}` : ""} (${c.stage})`).join("; ") || "All up to date"}
 
 Give me a prioritized briefing with what to focus on first.`;
 
