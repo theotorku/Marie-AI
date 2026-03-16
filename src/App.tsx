@@ -18,6 +18,7 @@ import PricingBanner from "./components/PricingBanner";
 import NotificationsPanel from "./components/NotificationsPanel";
 import SettingsTab from "./components/SettingsTab";
 import TemplatesTab from "./components/TemplatesTab";
+import AnalyticsTab from "./components/AnalyticsTab";
 import { useSlack } from "./hooks/useSlack";
 import { useTemplates } from "./hooks/useTemplates";
 import { useVoiceInput } from "./hooks/useVoiceInput";
@@ -418,6 +419,15 @@ export default function App() {
                 setInput(`Use this email template and customize it for my current situation:\n\nSubject: ${t.subject}\n\n${t.body}`);
                 setActiveTab("chat");
               }}
+              isPro={billing.tier === "professional"}
+              onUpgrade={billing.upgrade}
+            />
+          )}
+
+          {/* Analytics */}
+          {activeTab === "analytics" && (
+            <AnalyticsTab
+              token={auth.token}
               isPro={billing.tier === "professional"}
               onUpgrade={billing.upgrade}
             />
