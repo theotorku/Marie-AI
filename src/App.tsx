@@ -19,6 +19,8 @@ import NotificationsPanel from "./components/NotificationsPanel";
 import SettingsTab from "./components/SettingsTab";
 import TemplatesTab from "./components/TemplatesTab";
 import AnalyticsTab from "./components/AnalyticsTab";
+import CRMTab from "./components/CRMTab";
+import { useCRM } from "./hooks/useCRM";
 import { useSlack } from "./hooks/useSlack";
 import { useTemplates } from "./hooks/useTemplates";
 import { useVoiceInput } from "./hooks/useVoiceInput";
@@ -34,6 +36,7 @@ export default function App() {
   const notifs = useNotifications(auth.token);
   const slack = useSlack(auth.token);
   const templateStore = useTemplates(auth.token);
+  const crm = useCRM(auth.token);
   const voice = useVoiceInput((transcript) => setInput((prev) => prev ? `${prev} ${transcript}` : transcript));
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -375,6 +378,21 @@ export default function App() {
           {/* Calendar */}
           {activeTab === "calendar" && (
             <CalendarTab token={auth.token} connected={google.connected && billing.calendar} onConnect={billing.calendar ? google.connect : billing.upgrade} needsUpgrade={!billing.calendar} />
+          )}
+
+          {/* CRM */}
+          {activeTab === "contacts" && (
+            <CRMTab
+              contacts={crm.contacts}
+              onAdd={crm.addContact}
+              onUpdate={crm.updateContact}
+              onDelete={crm.deleteContact}
+              onGetInteractions={crm.getInteractions}
+              onAddInteraction={crm.addInteraction}
+              onAskMarie={(prompt) => { setInput(prompt); setActiveTab("chat"); }}
+              isPro={billing.tier === "professional"}
+              onUpgrade={billing.upgrade}
+            />
           )}
 
           {/* Products */}
