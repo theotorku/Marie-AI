@@ -16,6 +16,10 @@ import {
   getAuthUrl, handleCallback, isConnected, disconnect,
   listEmails, getEmail, sendEmail, listEvents,
 } from "./google.js";
+import {
+  generateDailyBriefing, detectFollowUpNudges,
+  prepareMeetingBriefing, checkRestockAlerts, runAllJobs,
+} from "./agent.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -364,6 +368,93 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
   });
 });
 
+// ── Notifications routes (protected, Pro only) ──────────────────────────────
+
+app.get("/api/notifications", authenticateToken, async (req, res) => {
+  const db = getDb();
+  const { data, error } = await db
+    .from("notifications")
+    .select("id, type, title, content, read, metadata, created_at")
+    .eq("user_id", req.user.id)
+    .in("channel", ["web", "both"])
+    .order("created_at", { ascending: false })
+    .limit(30);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ notifications: data });
+});
+
+app.get("/api/notifications/unread-count", authenticateToken, async (req, res) => {
+  const db = getDb();
+  const { count, error } = await db
+    .from("notifications")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", req.user.id)
+    .eq("read", false)
+    .in("channel", ["web", "both"]);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ count: count || 0 });
+});
+
+app.patch("/api/notifications/:id/read", authenticateToken, async (req, res) => {
+  const db = getDb();
+  const { error } = await db
+    .from("notifications")
+    .update({ read: true })
+    .eq("id", req.params.id)
+    .eq("user_id", req.user.id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ ok: true });
+});
+
+app.post("/api/notifications/read-all", authenticateToken, async (req, res) => {
+  const db = getDb();
+  const { error } = await db
+    .from("notifications")
+    .update({ read: true })
+    .eq("user_id", req.user.id)
+    .eq("read", false);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ ok: true });
+});
+
+// ── Agent routes (protected, Pro only) ──────────────────────────────────────
+
+app.post("/api/agent/briefing", authenticateToken, requireTier("proactiveAgent"), async (req, res) => {
+  try {
+    const result = await generateDailyBriefing(req.user.id);
+    res.json({ notification: result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/agent/nudges", authenticateToken, requireTier("proactiveAgent"), async (req, res) => {
+  try {
+    const results = await detectFollowUpNudges(req.user.id);
+    res.json({ notifications: results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/agent/meeting-prep", authenticateToken, requireTier("proactiveAgent"), async (req, res) => {
+  try {
+    const results = await prepareMeetingBriefing(req.user.id);
+    res.json({ notifications: results });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/agent/restock", authenticateToken, requireTier("proactiveAgent"), async (req, res) => {
+  try {
+    const result = await checkRestockAlerts(req.user.id);
+    res.json({ notification: result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── Static files (production) ─────────────────────────────────────────────────
 
 const distPath = join(__dirname, "../dist");
@@ -374,4 +465,8 @@ app.get("/{*splat}", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Marie AI proxy server running on http://localhost:${PORT}`);
+  // Start the scheduler in-process
+  import("./scheduler.js").catch((err) =>
+    console.error("[scheduler] Failed to start:", err.message)
+  );
 });

@@ -171,6 +171,62 @@ export async function sendEmail(userId, { to, subject, body }) {
   return { id: result.data.id };
 }
 
+// ── Gmail: Sent mail & threads (for proactive agent) ────────────────────
+
+export async function listSentEmails(userId, maxResults = 10, afterDate = null) {
+  const auth = await getAuthenticatedClient(userId);
+  if (!auth) throw new Error("Google account not connected.");
+
+  const gmail = google.gmail({ version: "v1", auth });
+  let q = "in:sent";
+  if (afterDate) q += ` after:${afterDate}`; // format: YYYY/MM/DD
+
+  const list = await gmail.users.messages.list({
+    userId: "me",
+    maxResults,
+    q,
+  });
+
+  if (!list.data.messages) return [];
+
+  const messages = await Promise.all(
+    list.data.messages.map(async (msg) => {
+      const full = await gmail.users.messages.get({
+        userId: "me",
+        id: msg.id,
+        format: "metadata",
+        metadataHeaders: ["To", "Subject", "Date"],
+      });
+      const headers = full.data.payload?.headers || [];
+      const get = (name) => headers.find((h) => h.name === name)?.value || "";
+      return {
+        id: msg.id,
+        threadId: full.data.threadId,
+        to: get("To"),
+        subject: get("Subject"),
+        date: get("Date"),
+        snippet: full.data.snippet || "",
+      };
+    })
+  );
+
+  return messages;
+}
+
+export async function getThreadMessageCount(userId, threadId) {
+  const auth = await getAuthenticatedClient(userId);
+  if (!auth) throw new Error("Google account not connected.");
+
+  const gmail = google.gmail({ version: "v1", auth });
+  const thread = await gmail.users.threads.get({
+    userId: "me",
+    id: threadId,
+    format: "minimal",
+  });
+
+  return thread.data.messages?.length || 0;
+}
+
 // ── Calendar ─────────────────────────────────────────────────────────────────
 
 export async function listEvents(userId, maxResults = 20) {
@@ -195,6 +251,34 @@ export async function listEvents(userId, maxResults = 20) {
     start: event.start?.dateTime || event.start?.date || "",
     end: event.end?.dateTime || event.end?.date || "",
     location: event.location || "",
+    attendees: (event.attendees || []).map((a) => a.email),
     htmlLink: event.htmlLink || "",
+  }));
+}
+
+export async function listUpcomingEvents(userId, hoursAhead = 24) {
+  const auth = await getAuthenticatedClient(userId);
+  if (!auth) throw new Error("Google account not connected.");
+
+  const calendar = google.calendar({ version: "v3", auth });
+  const now = new Date();
+  const until = new Date(now.getTime() + hoursAhead * 60 * 60 * 1000);
+
+  const result = await calendar.events.list({
+    calendarId: "primary",
+    timeMin: now.toISOString(),
+    timeMax: until.toISOString(),
+    singleEvents: true,
+    orderBy: "startTime",
+  });
+
+  return (result.data.items || []).map((event) => ({
+    id: event.id,
+    summary: event.summary || "(No title)",
+    description: event.description || "",
+    start: event.start?.dateTime || event.start?.date || "",
+    end: event.end?.dateTime || event.end?.date || "",
+    location: event.location || "",
+    attendees: (event.attendees || []).map((a) => a.email),
   }));
 }

@@ -6,6 +6,7 @@ import { useAuth } from "./hooks/useAuth";
 import { useGoogle } from "./hooks/useGoogle";
 import { useTasks } from "./hooks/useTasks";
 import { useBilling } from "./hooks/useBilling";
+import { useNotifications } from "./hooks/useNotifications";
 import ChatBubble from "./components/ChatBubble";
 import QuickAction from "./components/QuickAction";
 import TaskItem from "./components/TaskItem";
@@ -14,6 +15,7 @@ import EmailsTab from "./components/EmailsTab";
 import CalendarTab from "./components/CalendarTab";
 import AuthScreen from "./components/AuthScreen";
 import PricingBanner from "./components/PricingBanner";
+import NotificationsPanel from "./components/NotificationsPanel";
 import type { Task } from "./types";
 
 export default function App() {
@@ -23,8 +25,10 @@ export default function App() {
   const google = useGoogle(auth.token);
   const taskStore = useTasks(auth.token);
   const billing = useBilling(auth.token);
+  const notifs = useNotifications(auth.token);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [input, setInput] = useState("");
   const [newTask, setNewTask] = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState<Task["priority"]>("medium");
@@ -213,6 +217,32 @@ export default function App() {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            {/* Notification bell */}
+            <button
+              onClick={() => setNotifOpen(!notifOpen)}
+              style={{
+                position: "relative",
+                background: "none",
+                border: "none",
+                color: notifs.unreadCount > 0 ? "#C4973B" : "rgba(232,224,212,0.4)",
+                fontSize: 18,
+                cursor: "pointer",
+                padding: 4,
+              }}
+            >
+              {"\u{1F514}"}
+              {notifs.unreadCount > 0 && (
+                <span style={{
+                  position: "absolute", top: -2, right: -4,
+                  background: "#C4973B", color: "#1A1611",
+                  fontSize: 9, fontWeight: 700,
+                  width: 16, height: 16, borderRadius: "50%",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {notifs.unreadCount > 9 ? "9+" : notifs.unreadCount}
+                </span>
+              )}
+            </button>
             <span style={{ fontSize: 12, color: "rgba(232,224,212,0.5)" }}>{auth.user.name}</span>
             <button
               onClick={auth.logout}
@@ -403,6 +433,26 @@ export default function App() {
           )}
         </div>
       </div>
+
+      {/* Notifications panel overlay */}
+      {notifOpen && (
+        <>
+          <div
+            onClick={() => setNotifOpen(false)}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", zIndex: 199 }}
+          />
+          <NotificationsPanel
+            notifications={notifs.notifications}
+            onMarkRead={notifs.markAsRead}
+            onMarkAllRead={notifs.markAllRead}
+            onClose={() => setNotifOpen(false)}
+            onTriggerBriefing={async () => {
+              await notifs.triggerBriefing();
+            }}
+            isPro={billing.tier === "professional"}
+          />
+        </>
+      )}
     </div>
   );
 }

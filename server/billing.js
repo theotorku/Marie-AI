@@ -25,6 +25,8 @@ export const TIERS = {
     gmail: false,
     calendar: false,
     chatHistoryDays: 7,
+    proactiveAgent: false,
+    slack: false,
   },
   professional: {
     name: "Professional",
@@ -37,6 +39,8 @@ export const TIERS = {
     gmail: true,
     calendar: true,
     chatHistoryDays: null, // unlimited
+    proactiveAgent: true,
+    slack: true,
   },
 };
 

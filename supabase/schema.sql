@@ -43,7 +43,55 @@ create table if not exists google_tokens (
   updated_at timestamptz default now()
 );
 
+-- Notifications (proactive agent output)
+create table if not exists notifications (
+  id bigint generated always as identity primary key,
+  user_id uuid references users(id) on delete cascade not null,
+  type text not null check (type in ('daily_briefing', 'follow_up_nudge', 'meeting_prep', 'restock_alert')),
+  title text not null,
+  content text not null,
+  channel text not null default 'web' check (channel in ('web', 'slack', 'both')),
+  delivered boolean not null default false,
+  read boolean not null default false,
+  metadata jsonb,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_notifications_user on notifications(user_id, created_at desc);
+create index if not exists idx_notifications_undelivered on notifications(delivered, channel);
+
+-- Slack connections
+create table if not exists slack_connections (
+  id bigint generated always as identity primary key,
+  user_id uuid references users(id) on delete cascade,
+  slack_team_id text not null,
+  slack_team_name text,
+  slack_user_id text not null,
+  slack_channel_id text,
+  access_token text not null,
+  bot_token text not null,
+  scopes text,
+  created_at timestamptz default now(),
+  unique(slack_team_id, slack_user_id)
+);
+
+create index if not exists idx_slack_user on slack_connections(user_id);
+
+-- Agent run audit log
+create table if not exists agent_runs (
+  id bigint generated always as identity primary key,
+  user_id uuid references users(id) on delete cascade not null,
+  job_type text not null,
+  status text not null default 'running' check (status in ('running', 'completed', 'failed')),
+  result jsonb,
+  error text,
+  started_at timestamptz default now(),
+  completed_at timestamptz
+);
+
 -- If upgrading an existing database, run:
 -- alter table users add column if not exists tier text not null default 'free' check (tier in ('free', 'professional'));
 -- alter table users add column if not exists stripe_customer_id text;
 -- alter table users add column if not exists stripe_subscription_id text;
+-- alter table users add column if not exists agent_preferences jsonb default '{}';
+-- alter table users add column if not exists timezone text default 'America/New_York';
