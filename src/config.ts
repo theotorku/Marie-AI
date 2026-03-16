@@ -13,6 +13,7 @@ export const TABS: Tab[] = [
   { id: "emails", label: "Emails", icon: "\u2709" },
   { id: "calendar", label: "Calendar", icon: "\u25C9" },
   { id: "products", label: "Products", icon: "\u25C6" },
+  { id: "templates", label: "Templates", icon: "\u2709" },
   { id: "tasks", label: "Tasks", icon: "\u2610" },
   { id: "settings", label: "Settings", icon: "\u2699" },
 ];
