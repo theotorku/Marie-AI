@@ -10,6 +10,9 @@ create table if not exists users (
   tier text not null default 'free' check (tier in ('free', 'professional')),
   stripe_customer_id text,
   stripe_subscription_id text,
+  onboarding_completed boolean not null default false,
+  agent_preferences jsonb default '{}',
+  timezone text default 'America/New_York',
   created_at timestamptz default now()
 );
 
@@ -89,9 +92,46 @@ create table if not exists agent_runs (
   completed_at timestamptz
 );
 
--- If upgrading an existing database, run:
--- alter table users add column if not exists tier text not null default 'free' check (tier in ('free', 'professional'));
--- alter table users add column if not exists stripe_customer_id text;
--- alter table users add column if not exists stripe_subscription_id text;
--- alter table users add column if not exists agent_preferences jsonb default '{}';
--- alter table users add column if not exists timezone text default 'America/New_York';
+-- Contacts (CRM)
+create table if not exists contacts (
+  id bigint generated always as identity primary key,
+  user_id uuid references users(id) on delete cascade not null,
+  name text not null,
+  company text,
+  role text,
+  email text,
+  phone text,
+  stage text not null default 'lead' check (stage in ('lead', 'pitched', 'negotiating', 'closed', 'lost')),
+  notes text,
+  last_contacted_at timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create index if not exists idx_contacts_user on contacts(user_id, stage);
+
+-- Interaction log (CRM)
+create table if not exists interactions (
+  id bigint generated always as identity primary key,
+  contact_id bigint references contacts(id) on delete cascade not null,
+  user_id uuid references users(id) on delete cascade not null,
+  type text not null check (type in ('email', 'meeting', 'call', 'note')),
+  summary text not null,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_interactions_contact on interactions(contact_id, created_at desc);
+
+-- Email templates
+create table if not exists email_templates (
+  id bigint generated always as identity primary key,
+  user_id uuid references users(id) on delete cascade not null,
+  name text not null,
+  category text not null default 'general' check (category in ('buyer_outreach', 'follow_up', 'order_confirmation', 'meeting', 'general')),
+  subject text not null default '',
+  body text not null,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create index if not exists idx_email_templates_user on email_templates(user_id, category);
