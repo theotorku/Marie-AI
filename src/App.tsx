@@ -16,6 +16,8 @@ import CalendarTab from "./components/CalendarTab";
 import AuthScreen from "./components/AuthScreen";
 import PricingBanner from "./components/PricingBanner";
 import NotificationsPanel from "./components/NotificationsPanel";
+import SettingsTab from "./components/SettingsTab";
+import { useSlack } from "./hooks/useSlack";
 import type { Task } from "./types";
 
 export default function App() {
@@ -26,6 +28,7 @@ export default function App() {
   const taskStore = useTasks(auth.token);
   const billing = useBilling(auth.token);
   const notifs = useNotifications(auth.token);
+  const slack = useSlack(auth.token);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -430,6 +433,21 @@ export default function App() {
                 <TaskItem key={task.id} task={task} onToggle={() => taskStore.toggleTask(task.id)} onDelete={() => taskStore.deleteTask(task.id)} />
               ))}
             </div>
+          )}
+
+          {/* Settings */}
+          {activeTab === "settings" && (
+            <SettingsTab
+              googleConnected={google.connected}
+              onGoogleConnect={google.connect}
+              onGoogleDisconnect={google.disconnect}
+              slackConnected={slack.connected}
+              slackTeamName={slack.teamName}
+              onSlackConnect={slack.connect}
+              onSlackDisconnect={slack.disconnect}
+              tier={billing.tier}
+              onUpgrade={billing.upgrade}
+            />
           )}
         </div>
       </div>

@@ -14,6 +14,7 @@ export const TABS: Tab[] = [
   { id: "calendar", label: "Calendar", icon: "\u25C9" },
   { id: "products", label: "Products", icon: "\u25C6" },
   { id: "tasks", label: "Tasks", icon: "\u2610" },
+  { id: "settings", label: "Settings", icon: "\u2699" },
 ];
 
 export const SYSTEM_PROMPT = `You are Marie AI, a personal AI assistant for beauty industry professionals.

@@ -20,6 +20,10 @@ import {
   generateDailyBriefing, detectFollowUpNudges,
   prepareMeetingBriefing, checkRestockAlerts, runAllJobs,
 } from "./agent.js";
+import {
+  verifySlackRequest, getSlackAuthUrl, handleSlackCallback,
+  getSlackConnection, disconnectSlack, handleSlashCommand, handleSlackEvent,
+} from "./slack.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -31,6 +35,31 @@ app.post("/api/billing/webhook", express.raw({ type: "application/json" }), asyn
     res.json({ received: true });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+});
+
+// Slack endpoints need raw body for signature verification
+app.post("/api/slack/command", express.urlencoded({ extended: true, verify: (req, _res, buf) => { req.rawBody = buf.toString(); } }), async (req, res) => {
+  try {
+    if (process.env.SLACK_SIGNING_SECRET && !verifySlackRequest(req)) {
+      return res.status(401).json({ error: "Invalid signature" });
+    }
+    const response = await handleSlashCommand(req.body);
+    res.json(response);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/slack/events", express.json({ verify: (req, _res, buf) => { req.rawBody = buf.toString(); } }), async (req, res) => {
+  try {
+    if (process.env.SLACK_SIGNING_SECRET && !verifySlackRequest(req)) {
+      return res.status(401).json({ error: "Invalid signature" });
+    }
+    const response = await handleSlackEvent(req.body);
+    res.json(response);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -366,6 +395,51 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
       res.status(502).json({ error: "Failed to reach Anthropic API." });
     }
   });
+});
+
+// ── Slack OAuth routes (protected, Pro only) ────────────────────────────────
+
+app.get("/api/slack/auth-url", authenticateToken, requireTier("slack"), (req, res) => {
+  try {
+    const url = getSlackAuthUrl(req.user.id);
+    res.json({ url });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/slack/callback", async (req, res) => {
+  const { code, state: userId } = req.query;
+  if (!code || !userId) {
+    return res.status(400).send("Missing code or state parameter.");
+  }
+  try {
+    await handleSlackCallback(code, userId);
+    res.send(`
+      <html><body style="background:#1A1611;color:#E8E0D4;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh">
+        <div style="text-align:center">
+          <h2 style="color:#C4973B">Slack Connected!</h2>
+          <p>Your Slack workspace is now linked to Marie AI. You can close this window.</p>
+          <script>window.close();</script>
+        </div>
+      </body></html>
+    `);
+  } catch (err) {
+    res.status(500).send("Failed to connect Slack: " + err.message);
+  }
+});
+
+app.get("/api/slack/status", authenticateToken, async (req, res) => {
+  const conn = await getSlackConnection(req.user.id);
+  res.json({
+    connected: !!conn,
+    teamName: conn?.slack_team_name || null,
+  });
+});
+
+app.post("/api/slack/disconnect", authenticateToken, async (req, res) => {
+  await disconnectSlack(req.user.id);
+  res.json({ ok: true });
 });
 
 // ── Notifications routes (protected, Pro only) ──────────────────────────────

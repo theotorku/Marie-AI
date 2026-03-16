@@ -10,7 +10,7 @@ Personal AI assistant for beauty industry professionals, powered by Claude.
 - **Auth:** JWT + bcrypt (server-side), Supabase for storage
 - **AI:** Claude API via server-side proxy (`/api/chat`) + proactive agent (`server/agent.js`)
 - **Billing:** Stripe (subscriptions, checkout, customer portal, webhooks)
-- **Integrations:** Google OAuth2 for Gmail + Calendar APIs
+- **Integrations:** Google OAuth2 for Gmail + Calendar APIs, Slack (OAuth, slash commands, DMs, notifications)
 - **Scheduler:** node-cron for proactive agent jobs (briefings, nudges, meeting prep, restock alerts)
 - **Tests:** Vitest + React Testing Library (24 tests, 6 files)
 - **Landing:** Self-contained HTML/CSS/JS at `public/landing.html`
@@ -34,10 +34,12 @@ Personal AI assistant for beauty industry professionals, powered by Claude.
 - `server/agent.js` — proactive AI agent (daily briefings, follow-up nudges, meeting prep, restock alerts)
 - `server/scheduler.js` — cron schedules for agent jobs (imported by index.js on startup)
 - `server/auth.js` — user registration, login, JWT middleware
+- `server/slack.js` — Slack OAuth, slash command handler, DM events, notification delivery
 - `server/rateLimit.js` — tier-aware rate limiting
 - `src/components/` — React components (all `.tsx`)
 - `src/components/NotificationsPanel.tsx` — slide-out panel for agent notifications
-- `src/hooks/` — `useAuth`, `useChat`, `useGoogle`, `useTasks`, `useBilling`, `useNotifications`
+- `src/components/SettingsTab.tsx` — integrations management (Google, Slack, plan)
+- `src/hooks/` — `useAuth`, `useChat`, `useGoogle`, `useTasks`, `useBilling`, `useNotifications`, `useSlack`
 - `src/data/products.ts` — product catalog (static, injected into Claude system prompt + agent prompts)
 - `supabase/schema.sql` — database schema (users, messages, tasks, google_tokens, notifications, slack_connections, agent_runs)
 - `public/landing.html` — marketing landing page (self-contained, no build step)
@@ -72,12 +74,38 @@ Server-side AI agent (`server/agent.js`) that runs on cron schedules for Profess
 
 Agent output is stored in the `notifications` table and surfaced via:
 - In-app notification bell with unread badge + slide-out panel
-- Slack delivery (when connected, planned)
+- Slack delivery (auto-posted to DM or configured channel when Slack is connected)
 
 Users can also trigger a briefing on-demand via the "Generate Daily Briefing Now" button.
 
 API routes: `POST /api/agent/briefing`, `/api/agent/nudges`, `/api/agent/meeting-prep`, `/api/agent/restock`
 Notification routes: `GET /api/notifications`, `GET /api/notifications/unread-count`, `PATCH /api/notifications/:id/read`, `POST /api/notifications/read-all`
+
+## Slack Integration
+
+Slack integration (`server/slack.js`) enables chatting with Marie AI via Slack and receiving agent notifications:
+
+- **`/marie` slash command** — ask Marie anything from any Slack channel (async response via `response_url` for requests > 3s)
+- **DM support** — message the Marie AI bot directly in Slack
+- **Notification delivery** — agent briefings, nudges, and alerts auto-post to Slack when connected
+- **OAuth flow** — connect via Settings tab, tokens stored in `slack_connections` table
+
+Slack routes:
+- `POST /api/slack/command` — handles `/marie` slash command (Slack-verified, no JWT)
+- `POST /api/slack/events` — handles Events API / DMs (Slack-verified)
+- `GET /api/slack/auth-url` — returns OAuth URL (authenticated, Pro only)
+- `GET /api/slack/callback` — handles OAuth redirect
+- `GET /api/slack/status` — connection status
+- `POST /api/slack/disconnect` — remove connection
+
+Env vars needed: `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`, `SLACK_SIGNING_SECRET`
+
+Slack App setup (api.slack.com/apps):
+- Bot scopes: `chat:write`, `commands`, `im:history`, `im:write`, `channels:read`
+- Slash command URL: `https://jmarie.beauty/api/slack/command`
+- Events request URL: `https://jmarie.beauty/api/slack/events`
+- Event subscription: `message.im`
+- OAuth redirect: `https://jmarie.beauty/api/slack/callback`
 
 ## Key Decisions
 
@@ -97,3 +125,6 @@ Notification routes: `GET /api/notifications`, `GET /api/notifications/unread-co
 - Scheduler runs in-process via dynamic import on server startup
 - Agent functions are idempotent — safe to re-run if a job fails
 - Meeting prep deduplicates by event ID to avoid repeat notifications
+- Slack slash commands respond immediately with "Thinking..." then post Claude's answer async via response_url (3s Slack timeout)
+- Slack request verification uses HMAC-SHA256 signing secret with timing-safe comparison
+- Slack endpoints use raw body middleware (before express.json) for signature verification, same pattern as Stripe webhook

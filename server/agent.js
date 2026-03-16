@@ -4,6 +4,7 @@ import {
   isConnected, listEmails, listSentEmails,
   getThreadMessageCount, listEvents, listUpcomingEvents,
 } from "./google.js";
+import { deliverNotificationToSlack } from "./slack.js";
 
 // Product catalog (server-side copy for agent prompts)
 const PRODUCTS = [
@@ -91,6 +92,13 @@ async function createNotification(userId, type, title, content, metadata = null)
     .insert({ user_id: userId, type, title, content, channel, metadata })
     .select()
     .single();
+
+  // Deliver to Slack if connected
+  if (channel === "both" && data) {
+    deliverNotificationToSlack({ ...data, user_id: userId }).catch((err) =>
+      console.error("[agent] Slack delivery failed:", err.message)
+    );
+  }
 
   return data;
 }
