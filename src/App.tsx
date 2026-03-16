@@ -156,16 +156,12 @@ export default function App() {
           flexShrink: 0,
         }}
       >
-        <div
-          style={{
-            width: 40, height: 40, borderRadius: 12,
-            background: "linear-gradient(135deg, #8B6914, #C4973B)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 18, fontWeight: 700, color: "#1A1611", marginBottom: 20,
-            fontFamily: "'Playfair Display', serif",
-          }}
-        >
-          M
+        <div style={{ marginBottom: 20 }}>
+          <img
+            src="/Marie%20AI%202.png"
+            alt="Marie AI"
+            style={{ width: 40, height: 40, objectFit: "contain", borderRadius: 10 }}
+          />
         </div>
         {TABS.map((tab) => (
           <button

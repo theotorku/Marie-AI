@@ -59,35 +59,11 @@ export default function AuthScreen({ onLogin, onRegister }: AuthScreenProps) {
       <div style={{ width: 400, padding: 40 }}>
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 16,
-              background: "linear-gradient(135deg, #8B6914, #C4973B)",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 24,
-              fontWeight: 700,
-              color: "#1A1611",
-              fontFamily: "'Playfair Display', serif",
-              marginBottom: 16,
-            }}
-          >
-            M
-          </div>
-          <div
-            style={{
-              fontSize: 24,
-              fontFamily: "'Playfair Display', serif",
-              fontWeight: 600,
-              color: "#E8E0D4",
-              marginBottom: 6,
-            }}
-          >
-            Marie AI
-          </div>
+          <img
+            src="/Marie%20AI.png"
+            alt="Marie AI"
+            style={{ height: 56, width: "auto", objectFit: "contain", marginBottom: 20 }}
+          />
           <div style={{ fontSize: 13, color: "rgba(232,224,212,0.4)" }}>
             {mode === "login" ? "Welcome back" : "Create your account"}
           </div>
