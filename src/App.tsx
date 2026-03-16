@@ -33,6 +33,26 @@ export default function App() {
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Refresh billing after Stripe checkout redirect
+  const billingRef = useRef(billing);
+  billingRef.current = billing;
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("upgraded") === "true") {
+      window.history.replaceState({}, "", window.location.pathname);
+      // Poll for tier update (webhook may take a moment)
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        await billingRef.current.refresh();
+        attempts++;
+        if (billingRef.current.tier === "professional" || attempts >= 10) {
+          clearInterval(poll);
+        }
+      }, 2000);
+      return () => clearInterval(poll);
+    }
+  }, []);
+
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 60000);
     return () => clearInterval(t);
