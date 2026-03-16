@@ -18,6 +18,7 @@ import PricingBanner from "./components/PricingBanner";
 import NotificationsPanel from "./components/NotificationsPanel";
 import SettingsTab from "./components/SettingsTab";
 import { useSlack } from "./hooks/useSlack";
+import { useVoiceInput } from "./hooks/useVoiceInput";
 import type { Task } from "./types";
 
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
   const billing = useBilling(auth.token);
   const notifs = useNotifications(auth.token);
   const slack = useSlack(auth.token);
+  const voice = useVoiceInput((transcript) => setInput((prev) => prev ? `${prev} ${transcript}` : transcript));
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -319,6 +321,24 @@ export default function App() {
                         background: "rgba(255,255,255,0.04)", color: "#E8E0D4", fontSize: 14, outline: "none",
                       }}
                     />
+                    {voice.supported && (
+                      <button
+                        onClick={voice.toggle}
+                        disabled={loading}
+                        title={voice.listening ? "Stop listening" : "Voice input"}
+                        style={{
+                          padding: "14px 16px", borderRadius: 16,
+                          border: voice.listening ? "1px solid #C4973B" : "1px solid rgba(196,151,59,0.2)",
+                          background: voice.listening ? "rgba(196,151,59,0.15)" : "rgba(255,255,255,0.04)",
+                          color: voice.listening ? "#C4973B" : "rgba(232,224,212,0.5)",
+                          fontSize: 16, cursor: loading ? "not-allowed" : "pointer",
+                          transition: "all 0.2s",
+                          animation: voice.listening ? "pulse 1.5s infinite" : "none",
+                        }}
+                      >
+                        {"\u{1F3A4}"}
+                      </button>
+                    )}
                     <button
                       onClick={() => handleSend(input)}
                       disabled={loading || !input.trim()}
