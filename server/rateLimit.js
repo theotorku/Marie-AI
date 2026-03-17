@@ -10,7 +10,7 @@ export function rateLimit({ windowMs = 60_000, maxRequests = 20 } = {}) {
   const clients = new Map();
 
   // Sweep expired entries every 5 minutes to prevent memory growth
-  setInterval(() => {
+  const sweepTimer = setInterval(() => {
     const now = Date.now();
     for (const [ip, timestamps] of clients) {
       const valid = timestamps.filter((t) => now - t < windowMs);
@@ -21,6 +21,7 @@ export function rateLimit({ windowMs = 60_000, maxRequests = 20 } = {}) {
       }
     }
   }, 5 * 60_000);
+  sweepTimer.unref?.();
 
   return (req, res, next) => {
     const ip = req.ip || req.socket.remoteAddress || "unknown";

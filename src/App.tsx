@@ -97,14 +97,14 @@ export default function App() {
     return <AuthScreen onLogin={auth.login} onRegister={auth.register} />;
   }
 
-  const showOnboarding = auth.user && !auth.user.onboarding_completed;
+  const showOnboarding = !auth.user.onboarding_completed;
   const completeOnboarding = async () => {
-    await fetch("/api/auth/onboarding-complete", {
+    const res = await fetch("/api/auth/onboarding-complete", {
       method: "POST",
       headers: { Authorization: `Bearer ${auth.token}` },
     });
-    // Update local user state
-    auth.user!.onboarding_completed = true;
+    if (!res.ok) return;
+    auth.updateUser({ onboarding_completed: true });
   };
 
   const handleSend = (text: string) => {

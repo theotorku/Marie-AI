@@ -36,13 +36,13 @@ async function saveTokens(userId, tokens) {
     .upsert({ user_id: userId, tokens, updated_at: new Date().toISOString() });
 }
 
-export function getAuthUrl(userId) {
+export function getAuthUrl(state) {
   const client = getOAuth2Client();
   return client.generateAuthUrl({
     access_type: "offline",
     prompt: "consent",
     scope: SCOPES,
-    state: userId,
+    state,
   });
 }
 

@@ -72,5 +72,15 @@ export function useAuth() {
     setState({ user: null, token: null, loading: false });
   }, []);
 
-  return { ...state, login, register, logout };
+  const updateUser = useCallback((updates: Partial<User>) => {
+    setState((prev) => {
+      if (!prev.user) return prev;
+      return {
+        ...prev,
+        user: { ...prev.user, ...updates },
+      };
+    });
+  }, []);
+
+  return { ...state, login, register, logout, updateUser };
 }

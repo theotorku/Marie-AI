@@ -10,6 +10,9 @@ export function verifySlackRequest(req) {
 
   const timestamp = req.headers["x-slack-request-timestamp"];
   const slackSig = req.headers["x-slack-signature"];
+  if (typeof timestamp !== "string" || typeof slackSig !== "string") {
+    return false;
+  }
 
   // Reject requests older than 5 minutes
   if (Math.abs(Date.now() / 1000 - Number(timestamp)) > 300) {
@@ -18,19 +21,20 @@ export function verifySlackRequest(req) {
 
   const baseString = `v0:${timestamp}:${req.rawBody}`;
   const hash = "v0=" + crypto.createHmac("sha256", signingSecret).update(baseString).digest("hex");
+  if (hash.length !== slackSig.length) return false;
   return crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(slackSig));
 }
 
 // ── OAuth ────────────────────────────────────────────────────────────────
 
-export function getSlackAuthUrl(userId) {
+export function getSlackAuthUrl(state) {
   const clientId = process.env.SLACK_CLIENT_ID;
   if (!clientId) throw new Error("SLACK_CLIENT_ID not set");
 
   const redirectUri = `${process.env.APP_URL || "http://localhost:3001"}/api/slack/callback`;
   const scopes = "chat:write,commands,im:history,im:write,channels:read";
 
-  return `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${userId}`;
+  return `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
 }
 
 export async function handleSlackCallback(code, userId) {

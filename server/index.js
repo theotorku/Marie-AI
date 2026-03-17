@@ -24,9 +24,23 @@ import {
   verifySlackRequest, getSlackAuthUrl, handleSlackCallback,
   getSlackConnection, disconnectSlack, handleSlashCommand, handleSlackEvent,
 } from "./slack.js";
+import {
+  createOAuthState,
+  createOAuthStateCookie,
+  clearOAuthStateCookie,
+  consumeOAuthState,
+} from "./oauthState.js";
 
-const app = express();
 const PORT = process.env.PORT || 3001;
+
+export function createApp() {
+const app = express();
+const chatRateLimiters = Object.fromEntries(
+  Object.entries(TIERS).map(([tier, config]) => [
+    tier,
+    rateLimit({ windowMs: 60_000, maxRequests: config.rateLimit }),
+  ])
+);
 
 // Stripe webhook needs raw body — must come before express.json()
 app.post("/api/billing/webhook", express.raw({ type: "application/json" }), async (req, res) => {
@@ -119,7 +133,9 @@ app.get("/api/google/status", authenticateToken, async (req, res) => {
 
 app.get("/api/google/auth-url", authenticateToken, (req, res) => {
   try {
-    const url = getAuthUrl(req.user.id);
+    const state = createOAuthState("google", req.user.id);
+    const url = getAuthUrl(state);
+    res.setHeader("Set-Cookie", createOAuthStateCookie("google", state));
     res.json({ url });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -127,12 +143,21 @@ app.get("/api/google/auth-url", authenticateToken, (req, res) => {
 });
 
 app.get("/api/google/callback", async (req, res) => {
-  const { code, state: userId } = req.query;
-  if (!code || !userId) {
+  const { code, state } = req.query;
+  if (typeof code !== "string" || !code || typeof state !== "string" || !state) {
+    res.setHeader("Set-Cookie", clearOAuthStateCookie("google"));
     return res.status(400).send("Missing code or state parameter.");
   }
+
+  const validatedState = consumeOAuthState("google", req, state);
+  if (!validatedState.ok) {
+    res.setHeader("Set-Cookie", clearOAuthStateCookie("google"));
+    return res.status(400).send(validatedState.error);
+  }
+
   try {
-    await handleCallback(code, userId);
+    await handleCallback(code, validatedState.userId);
+    res.setHeader("Set-Cookie", clearOAuthStateCookie("google"));
     res.send(`
       <html><body style="background:#1A1611;color:#E8E0D4;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh">
         <div style="text-align:center">
@@ -143,6 +168,7 @@ app.get("/api/google/callback", async (req, res) => {
       </body></html>
     `);
   } catch (err) {
+    res.setHeader("Set-Cookie", clearOAuthStateCookie("google"));
     res.status(500).send("Failed to connect Google account: " + err.message);
   }
 });
@@ -367,7 +393,7 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
   }
 
   // Apply tier-specific rate limit
-  const limiter = rateLimit({ windowMs: 60_000, maxRequests: config.rateLimit });
+  const limiter = chatRateLimiters[tier] || chatRateLimiters.free;
   limiter(req, res, async () => {
     try {
       // Override model and max_tokens based on tier
@@ -407,7 +433,9 @@ app.post("/api/chat", authenticateToken, async (req, res) => {
 
 app.get("/api/slack/auth-url", authenticateToken, requireTier("slack"), (req, res) => {
   try {
-    const url = getSlackAuthUrl(req.user.id);
+    const state = createOAuthState("slack", req.user.id);
+    const url = getSlackAuthUrl(state);
+    res.setHeader("Set-Cookie", createOAuthStateCookie("slack", state));
     res.json({ url });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -415,12 +443,21 @@ app.get("/api/slack/auth-url", authenticateToken, requireTier("slack"), (req, re
 });
 
 app.get("/api/slack/callback", async (req, res) => {
-  const { code, state: userId } = req.query;
-  if (!code || !userId) {
+  const { code, state } = req.query;
+  if (typeof code !== "string" || !code || typeof state !== "string" || !state) {
+    res.setHeader("Set-Cookie", clearOAuthStateCookie("slack"));
     return res.status(400).send("Missing code or state parameter.");
   }
+
+  const validatedState = consumeOAuthState("slack", req, state);
+  if (!validatedState.ok) {
+    res.setHeader("Set-Cookie", clearOAuthStateCookie("slack"));
+    return res.status(400).send(validatedState.error);
+  }
+
   try {
-    await handleSlackCallback(code, userId);
+    await handleSlackCallback(code, validatedState.userId);
+    res.setHeader("Set-Cookie", clearOAuthStateCookie("slack"));
     res.send(`
       <html><body style="background:#1A1611;color:#E8E0D4;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh">
         <div style="text-align:center">
@@ -431,6 +468,7 @@ app.get("/api/slack/callback", async (req, res) => {
       </body></html>
     `);
   } catch (err) {
+    res.setHeader("Set-Cookie", clearOAuthStateCookie("slack"));
     res.status(500).send("Failed to connect Slack: " + err.message);
   }
 });
@@ -785,10 +823,21 @@ app.get("/{*splat}", (req, res) => {
   res.sendFile(join(distPath, "index.html"));
 });
 
-app.listen(PORT, () => {
-  console.log(`Marie AI proxy server running on http://localhost:${PORT}`);
-  // Start the scheduler in-process
-  import("./scheduler.js").catch((err) =>
-    console.error("[scheduler] Failed to start:", err.message)
-  );
-});
+return app;
+}
+
+export function startServer(port = PORT) {
+  const app = createApp();
+
+  return app.listen(port, () => {
+    console.log(`Marie AI proxy server running on http://localhost:${port}`);
+    // Start the scheduler in-process
+    import("./scheduler.js").catch((err) =>
+      console.error("[scheduler] Failed to start:", err.message)
+    );
+  });
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+  startServer();
+}
