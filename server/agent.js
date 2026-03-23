@@ -3,7 +3,7 @@ import { getUserTier, TIERS } from "./billing.js";
 import {
   isConnected, listEmails, listSentEmails,
   getThreadMessageCount, listEvents, listUpcomingEvents,
-} from "./google.js";
+} from "./n8n.js";
 import { deliverNotificationToSlack } from "./slack.js";
 
 // Product catalog (server-side copy for agent prompts)

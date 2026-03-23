@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { rateLimit } from "./rateLimit.js";
 import { registerAuthRoutes } from "./routes/authRoutes.js";
-import { registerGoogleRoutes } from "./routes/googleRoutes.js";
+import { registerN8nRoutes } from "./routes/n8nRoutes.js";
 import { registerBillingRoutes } from "./routes/billingRoutes.js";
 import { registerTaskRoutes } from "./routes/taskRoutes.js";
 import { registerMessageRoutes } from "./routes/messageRoutes.js";
@@ -24,9 +24,9 @@ import {
   createCheckoutSession, createPortalSession, handleWebhook,
 } from "./billing.js";
 import {
-  getAuthUrl, handleCallback, isConnected, disconnect,
+  isConnected, disconnect, saveConnection,
   listEmails, getEmail, sendEmail, listEvents,
-} from "./google.js";
+} from "./n8n.js";
 import {
   generateDailyBriefing, detectFollowUpNudges,
   prepareMeetingBriefing, checkRestockAlerts,
@@ -119,19 +119,14 @@ registerAuthRoutes(app, {
   getDb,
 });
 
-// ── Google routes (OAuth, Gmail, Calendar) ───────────────────────────────────
+// ── n8n routes (email, calendar via n8n webhooks) ────────────────────────────
 
-registerGoogleRoutes(app, {
+registerN8nRoutes(app, {
   authenticateToken,
   requireTier,
-  createOAuthState,
-  createOAuthStateCookie,
-  clearOAuthStateCookie,
-  consumeOAuthState,
-  getAuthUrl,
-  handleCallback,
   isConnected,
   disconnect,
+  saveConnection,
   listEmails,
   getEmail,
   sendEmail,

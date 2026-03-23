@@ -3,8 +3,8 @@ import { useState } from "react";
 interface OnboardingProps {
   userName: string;
   tier: string;
-  googleConnected: boolean;
-  onConnectGoogle: () => void;
+  n8nConnected: boolean;
+  onConnectN8n: (url: string) => Promise<string | null>;
   onUpgrade: () => void;
   onComplete: () => void;
   onSendMessage: (msg: string) => void;
@@ -18,10 +18,22 @@ const STEPS = [
 ];
 
 export default function Onboarding({
-  userName, tier, googleConnected, onConnectGoogle, onUpgrade, onComplete, onSendMessage,
+  userName, tier, n8nConnected, onConnectN8n, onUpgrade, onComplete, onSendMessage,
 }: OnboardingProps) {
   const [step, setStep] = useState(0);
+  const [webhookUrl, setWebhookUrl] = useState("");
+  const [connectError, setConnectError] = useState<string | null>(null);
+  const [connecting, setConnecting] = useState(false);
   const firstName = userName.split(" ")[0];
+
+  const handleConnect = async () => {
+    if (!webhookUrl.trim()) return;
+    setConnecting(true);
+    setConnectError(null);
+    const err = await onConnectN8n(webhookUrl.trim());
+    if (err) setConnectError(err);
+    setConnecting(false);
+  };
 
   const next = () => {
     if (step < STEPS.length - 1) setStep(step + 1);
@@ -83,22 +95,39 @@ export default function Onboarding({
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
               <div style={{
                 padding: "16px 20px", borderRadius: 12,
-                border: `1px solid ${googleConnected ? "rgba(76,175,80,0.3)" : "rgba(196,151,59,0.2)"}`,
-                background: googleConnected ? "rgba(76,175,80,0.06)" : "rgba(255,255,255,0.03)",
-                display: "flex", justifyContent: "space-between", alignItems: "center",
+                border: `1px solid ${n8nConnected ? "rgba(76,175,80,0.3)" : "rgba(196,151,59,0.2)"}`,
+                background: n8nConnected ? "rgba(76,175,80,0.06)" : "rgba(255,255,255,0.03)",
               }}>
-                <div style={{ textAlign: "left" }}>
-                  <div style={{ fontSize: 14, fontWeight: 600 }}>Google</div>
-                  <div style={{ fontSize: 11, color: "rgba(232,224,212,0.4)" }}>Gmail & Calendar integration</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ textAlign: "left" }}>
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>n8n Automation</div>
+                    <div style={{ fontSize: 11, color: "rgba(232,224,212,0.4)" }}>Gmail & Calendar via n8n webhooks</div>
+                  </div>
+                  {n8nConnected && (
+                    <span style={{ color: "#4CAF50", fontSize: 12, fontWeight: 600 }}>Connected</span>
+                  )}
                 </div>
-                {googleConnected ? (
-                  <span style={{ color: "#4CAF50", fontSize: 12, fontWeight: 600 }}>Connected</span>
-                ) : (
-                  <button onClick={onConnectGoogle} style={{
-                    padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(196,151,59,0.3)",
-                    background: "rgba(196,151,59,0.08)", color: "#C4973B",
-                    fontSize: 12, fontWeight: 600, cursor: "pointer",
-                  }}>Connect</button>
+                {!n8nConnected && (
+                  <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
+                    <input
+                      value={webhookUrl}
+                      onChange={(e) => setWebhookUrl(e.target.value)}
+                      placeholder="https://your-n8n.app/webhook/..."
+                      style={{
+                        flex: 1, padding: "8px 12px", borderRadius: 8,
+                        border: "1px solid rgba(196,151,59,0.2)", background: "rgba(255,255,255,0.04)",
+                        color: "#E8E0D4", fontSize: 12, outline: "none",
+                      }}
+                    />
+                    <button onClick={handleConnect} disabled={connecting} style={{
+                      padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(196,151,59,0.3)",
+                      background: "rgba(196,151,59,0.08)", color: "#C4973B",
+                      fontSize: 12, fontWeight: 600, cursor: connecting ? "not-allowed" : "pointer",
+                    }}>{connecting ? "..." : "Connect"}</button>
+                  </div>
+                )}
+                {connectError && (
+                  <div style={{ fontSize: 11, color: "#E8735A", marginTop: 6 }}>{connectError}</div>
                 )}
               </div>
 

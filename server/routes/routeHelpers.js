@@ -1,10 +1,44 @@
 function getErrorMessage(err) {
   if (err instanceof Error) return err.message;
+  if (err && typeof err === "object" && typeof err.message === "string") {
+    return err.message;
+  }
   return typeof err === "string" ? err : "Unknown error";
 }
 
 export function sendJsonError(res, status, err) {
   return res.status(status).json({ error: getErrorMessage(err) });
+}
+
+export function scopeToUser(query, userId, userIdColumn = "user_id") {
+  return query.eq(userIdColumn, userId);
+}
+
+export function scopeToOwnedRecord(query, id, userId, options = {}) {
+  const { idColumn = "id", userIdColumn = "user_id" } = options;
+  return query.eq(idColumn, id).eq(userIdColumn, userId);
+}
+
+export function sendListResponse(res, result, key) {
+  if (result.error) return sendJsonError(res, 500, result.error);
+  return res.json({ [key]: result.data });
+}
+
+export function sendRecordResponse(res, result, key, options = {}) {
+  const { status = 200, notFoundMessage } = options;
+  if (result.error) return sendJsonError(res, 500, result.error);
+  if (notFoundMessage && !result.data) {
+    return res.status(404).json({ error: notFoundMessage });
+  }
+  if (status === 201) {
+    return res.status(201).json({ [key]: result.data });
+  }
+  return res.json({ [key]: result.data });
+}
+
+export function sendOkResponse(res, error) {
+  if (error) return sendJsonError(res, 500, error);
+  return res.json({ ok: true });
 }
 
 function renderOAuthSuccessPage(title, message) {
