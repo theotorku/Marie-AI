@@ -3,7 +3,7 @@ import { getUserTier, TIERS } from "./billing.js";
 import {
   isConnected, listEmails, listSentEmails,
   getThreadMessageCount, listEvents, listUpcomingEvents,
-} from "./n8n.js";
+} from "./google.js";
 import { deliverNotificationToSlack } from "./slack.js";
 
 // Product catalog (server-side copy for agent prompts)
@@ -20,7 +20,7 @@ const PRODUCTS = [
 
 // ── Claude helper ────────────────────────────────────────────────────────
 
-async function callClaude(systemPrompt, userPrompt, model = "claude-haiku-4-5") {
+async function callClaude(systemPrompt, userPrompt, model = "claude-haiku-4-5-20251001") {
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) throw new Error("CLAUDE_API_KEY not configured");
 
@@ -112,7 +112,7 @@ export async function generateDailyBriefing(userId) {
     const db = getDb();
     const googleConnected = await isConnected(userId);
     const tier = await getUserTier(userId);
-    const model = TIERS[tier]?.model || "claude-haiku-4-5";
+    const model = TIERS[tier]?.model || "claude-haiku-4-5-20251001";
 
     // Gather context
     const { data: tasks } = await db
@@ -198,7 +198,7 @@ export async function detectFollowUpNudges(userId) {
     }
 
     const tier = await getUserTier(userId);
-    const model = TIERS[tier]?.model || "claude-haiku-4-5";
+    const model = TIERS[tier]?.model || "claude-haiku-4-5-20251001";
     const prefs = await getAgentPrefs(userId);
     const followUpDays = prefs.followUpDays || 3;
 
@@ -265,7 +265,7 @@ export async function prepareMeetingBriefing(userId) {
     }
 
     const tier = await getUserTier(userId);
-    const model = TIERS[tier]?.model || "claude-haiku-4-5";
+    const model = TIERS[tier]?.model || "claude-haiku-4-5-20251001";
 
     const events = await listUpcomingEvents(userId, 4);
     if (events.length === 0) {
@@ -326,7 +326,7 @@ export async function checkRestockAlerts(userId) {
 
   try {
     const tier = await getUserTier(userId);
-    const model = TIERS[tier]?.model || "claude-haiku-4-5";
+    const model = TIERS[tier]?.model || "claude-haiku-4-5-20251001";
 
     const month = new Date().getMonth(); // 0-indexed
     const seasonMap = {

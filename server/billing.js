@@ -20,7 +20,7 @@ export const TIERS = {
     messagesPerDay: 20,
     maxTasks: 10,
     maxOutputTokens: 512,
-    model: "claude-haiku-4-5",
+    model: "claude-haiku-4-5-20251001",
     rateLimit: 5,
     gmail: false,
     calendar: false,

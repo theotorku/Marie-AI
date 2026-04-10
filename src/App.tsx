@@ -3,7 +3,7 @@ import { CONFIG, TABS } from "./config";
 import { PRODUCT_KB } from "./data/products";
 import { useChat } from "./hooks/useChat";
 import { useAuth } from "./hooks/useAuth";
-import { useN8n } from "./hooks/useN8n";
+import { useGoogle } from "./hooks/useGoogle";
 import { useTasks } from "./hooks/useTasks";
 import { useBilling } from "./hooks/useBilling";
 import { useNotifications } from "./hooks/useNotifications";
@@ -32,7 +32,7 @@ export default function App() {
   const auth = useAuth();
   const [activeTab, setActiveTab] = useState("chat");
   const { messages, loading, error, sendMessage } = useChat(auth.token);
-  const n8n = useN8n(auth.token);
+  const google = useGoogle(auth.token);
   const taskStore = useTasks(auth.token);
   const billing = useBilling(auth.token);
   const notifs = useNotifications(auth.token);
@@ -140,8 +140,8 @@ export default function App() {
       <Onboarding
         userName={auth.user.name}
         tier={billing.tier}
-        n8nConnected={n8n.connected}
-        onConnectN8n={n8n.connect}
+        googleConnected={google.connected}
+        onConnectGoogle={google.connect}
         onUpgrade={billing.upgrade}
         onComplete={completeOnboarding}
         onSendMessage={(msg) => { sendMessage(msg); completeOnboarding(); }}
@@ -398,12 +398,12 @@ export default function App() {
 
           {/* Emails */}
           {activeTab === "emails" && (
-            <EmailsTab token={auth.token} connected={n8n.connected && billing.gmail} onConnect={billing.gmail ? () => setActiveTab("settings") : billing.upgrade} needsUpgrade={!billing.gmail} />
+            <EmailsTab token={auth.token} connected={google.connected && billing.gmail} onConnect={billing.gmail ? google.connect : billing.upgrade} needsUpgrade={!billing.gmail} />
           )}
 
           {/* Calendar */}
           {activeTab === "calendar" && (
-            <CalendarTab token={auth.token} connected={n8n.connected && billing.calendar} onConnect={billing.calendar ? () => setActiveTab("settings") : billing.upgrade} needsUpgrade={!billing.calendar} />
+            <CalendarTab token={auth.token} connected={google.connected && billing.calendar} onConnect={billing.calendar ? google.connect : billing.upgrade} needsUpgrade={!billing.calendar} />
           )}
 
           {/* CRM */}
@@ -550,9 +550,9 @@ export default function App() {
           {/* Settings */}
           {activeTab === "settings" && (
             <SettingsTab
-              n8nConnected={n8n.connected}
-              onN8nConnect={n8n.connect}
-              onN8nDisconnect={n8n.disconnect}
+              googleConnected={google.connected}
+              onGoogleConnect={google.connect}
+              onGoogleDisconnect={google.disconnect}
               slackConnected={slack.connected}
               slackTeamName={slack.teamName}
               onSlackConnect={slack.connect}

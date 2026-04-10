@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 const mocks = vi.hoisted(() => ({
   billing: {
     TIERS: {
-      free: { rateLimit: 2, slack: false, gmail: false, proactiveAgent: false, chatHistoryDays: 7, maxTasks: 10, maxOutputTokens: 512, model: "claude-haiku-4-5" },
+      free: { rateLimit: 2, slack: false, gmail: false, proactiveAgent: false, chatHistoryDays: 7, maxTasks: 10, maxOutputTokens: 512, model: "claude-haiku-4-5-20251001" },
       professional: { rateLimit: 10, slack: true, gmail: true, proactiveAgent: true, chatHistoryDays: null, maxTasks: null, maxOutputTokens: 1024, model: "claude-sonnet-4-6" },
     },
     getUserTier: vi.fn(),

@@ -39,10 +39,10 @@ create table if not exists tasks (
 
 create index if not exists idx_tasks_user on tasks(user_id);
 
--- n8n webhook connections (replaces Google OAuth tokens)
-create table if not exists n8n_connections (
+-- Google OAuth tokens (per-user Gmail + Calendar access)
+create table if not exists google_tokens (
   user_id uuid primary key references users(id) on delete cascade,
-  webhook_url text not null,
+  tokens jsonb not null,
   updated_at timestamptz default now()
 );
 

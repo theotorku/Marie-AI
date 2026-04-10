@@ -6,11 +6,11 @@ Personal AI assistant for beauty industry professionals, powered by Claude.
 
 - **Frontend:** React 19, TypeScript, Vite
 - **Backend:** Express (ESM), Node.js
-- **Database:** Supabase (PostgreSQL) — users, messages, tasks, n8n_connections, notifications, slack_connections, agent_runs, contacts, interactions, email_templates
+- **Database:** Supabase (PostgreSQL) — users, messages, tasks, google_tokens, notifications, slack_connections, agent_runs, contacts, interactions, email_templates
 - **Auth:** JWT + bcrypt (server-side), Supabase for storage
 - **AI:** Claude API via server-side proxy (`/api/chat`) + proactive agent (`server/agent.js`)
 - **Billing:** Stripe (subscriptions, checkout, customer portal, webhooks)
-- **Integrations:** n8n webhooks (Gmail + Calendar), Slack (OAuth, slash commands, DMs, notifications)
+- **Integrations:** Google OAuth (Gmail + Calendar), Slack (OAuth, slash commands, DMs, notifications)
 - **Scheduler:** node-cron for proactive agent jobs (briefings, nudges, meeting prep, restock alerts)
 - **Tests:** Vitest + React Testing Library (24 tests, 6 files)
 - **Landing:** Self-contained HTML/CSS/JS at `public/landing.html`
@@ -26,11 +26,11 @@ Personal AI assistant for beauty industry professionals, powered by Claude.
 
 ## Project Layout
 
-- `server/` — Express backend (auth, db, billing, rate limiting, n8n webhooks, API proxy, agent, slack, CRM)
+- `server/` — Express backend (auth, db, billing, rate limiting, Google OAuth, API proxy, agent, slack, CRM)
 - `server/index.js` — main Express server, all API routes, imports scheduler on startup
 - `server/db.js` — Supabase client singleton
 - `server/billing.js` — Stripe integration, tier config (`TIERS` object), usage tracking
-- `server/n8n.js` — n8n webhook client for Gmail/Calendar (replaces Google OAuth — no approval needed)
+- `server/google.js` — Google OAuth2, Gmail API, Calendar API
 - `server/agent.js` — proactive AI agent (daily briefings, follow-up nudges, meeting prep, restock alerts, CRM-aware)
 - `server/scheduler.js` — cron schedules for agent jobs (imported by index.js on startup)
 - `server/auth.js` — user registration, login, JWT middleware
@@ -39,12 +39,12 @@ Personal AI assistant for beauty industry professionals, powered by Claude.
 - `src/components/` — React components (all `.tsx`)
 - `src/components/Onboarding.tsx` — 4-step guided onboarding flow for new users
 - `src/components/NotificationsPanel.tsx` — slide-out panel for agent notifications
-- `src/components/SettingsTab.tsx` — integrations management (n8n, Slack, plan)
+- `src/components/SettingsTab.tsx` — integrations management (Google, Slack, plan)
 - `src/components/CRMTab.tsx` — contacts, pipeline stages, interaction timeline
 - `src/components/TemplatesTab.tsx` — email template management with categories
 - `src/components/AnalyticsTab.tsx` — usage stats, activity chart, task/notification breakdowns
 - `src/components/PDFExport.tsx` — sell sheet and line sheet PDF generation (browser print)
-- `src/hooks/` — `useAuth`, `useChat`, `useN8n`, `useTasks`, `useBilling`, `useNotifications`, `useSlack`, `useTemplates`, `useCRM`, `useVoiceInput`
+- `src/hooks/` — `useAuth`, `useChat`, `useGoogle`, `useTasks`, `useBilling`, `useNotifications`, `useSlack`, `useTemplates`, `useCRM`, `useVoiceInput`
 - `src/speech.d.ts` — Web Speech API type declarations
 - `src/data/products.ts` — product catalog (static, injected into Claude system prompt + agent prompts)
 - `supabase/schema.sql` — full database schema
@@ -187,9 +187,9 @@ Browser-based voice input (`src/hooks/useVoiceInput.ts`) using the Web Speech AP
 ## Key Decisions
 
 - API key never touches the browser — all Claude calls go through Express proxy
-- All persistent data stored in Supabase (users, messages, tasks, OAuth tokens, notifications, contacts, templates)
+- All persistent data stored in Supabase (users, messages, tasks, Google OAuth tokens, notifications, contacts, templates)
 - Chat history and tasks are per-user, server-side — no localStorage dependency
-- Google OAuth uses a single flow for both Gmail and Calendar scopes
+- Google OAuth provides Gmail and Calendar access (testing mode for launch, verification pending)
 - Free tier uses Haiku (~5-8x cheaper than Sonnet) to keep costs sustainable
 - Stripe webhooks update tier in DB on subscription changes
 - Rate limits and model selection are tier-aware, enforced server-side

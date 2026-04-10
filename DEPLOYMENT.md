@@ -86,9 +86,9 @@
    - `https://www.googleapis.com/auth/gmail.readonly`
    - `https://www.googleapis.com/auth/gmail.send`
    - `https://www.googleapis.com/auth/calendar.readonly`
-4. Add test users (your email) while the app is in testing mode
+4. Add test users (their email addresses) — up to 100 users allowed in testing mode
 
-> Google requires app verification for production use with sensitive scopes. Submit for verification once you're ready to go live.
+> **Testing mode** allows up to 100 manually-added users without verification. Submit for verification when ready to go public.
 
 ---
 
@@ -231,8 +231,8 @@ docker run -p 3001:3001 --env-file .env marie-ai
 - [ ] All environment variables set on hosting provider
 - [ ] Stripe webhook endpoint updated to production URL
 - [ ] Google OAuth redirect URI updated to production URL
-- [ ] Google OAuth consent screen submitted for verification (if going public)
-- [ ] HTTPS enabled (required for OAuth and Stripe)
+- [ ] Google OAuth consent screen configured with test users
+- [ ] HTTPS enabled (required for Stripe and webhooks)
 - [ ] Test user registration and login
 - [ ] Test free tier chat (should use Haiku, 20 msg/day limit)
 - [ ] Test free tier task cap (should block at 10 tasks)
