@@ -177,7 +177,7 @@ export default function MarieScore({
                       fontSize: 48,
                       fontWeight: 700,
                       color: "#fff",
-                      fontFamily: "'Playfair Display', serif",
+                      fontFamily: "'Cormorant Garamond', Georgia, serif",
                       lineHeight: 1,
                     }}
                   >

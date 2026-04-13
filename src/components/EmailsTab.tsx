@@ -63,13 +63,13 @@ export default function EmailsTab({ token, connected, onConnect, needsUpgrade }:
   if (!connected) {
     return (
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 600, marginBottom: 24 }}>Inbox</h2>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, fontWeight: 600, marginBottom: 24 }}>Inbox</h2>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "80px 40px", textAlign: "center" }}>
           <div style={{ fontSize: 48, marginBottom: 20 }}>{"\u2709"}</div>
-          <div style={{ fontSize: 18, fontFamily: "'Playfair Display', serif", color: "#E8E0D4", marginBottom: 10 }}>
+          <div style={{ fontSize: 18, fontFamily: "'Cormorant Garamond', Georgia, serif", color: "#E8E0D4", marginBottom: 10 }}>
             {needsUpgrade ? "Gmail Integration" : "Connect Gmail"}
           </div>
-          <div style={{ fontSize: 13, color: "rgba(232,224,212,0.4)", maxWidth: 360, lineHeight: 1.7, marginBottom: 4 }}>
+          <div style={{ fontSize: 13, color: "rgba(232,224,212,0.7)", maxWidth: 360, lineHeight: 1.7, marginBottom: 4 }}>
             {needsUpgrade
               ? "Read emails, get AI summaries, and draft replies — all from within Marie AI."
               : "Link your Google account to view your inbox, read emails, and draft AI-powered replies."}
@@ -113,18 +113,19 @@ export default function EmailsTab({ token, connected, onConnect, needsUpgrade }:
           background: "rgba(255,255,255,0.03)",
           border: "1px solid rgba(196,151,59,0.1)",
         }}>
-          <div style={{ fontSize: 18, fontWeight: 600, color: "#E8E0D4", marginBottom: 8, fontFamily: "'Playfair Display', serif" }}>
+          <div style={{ fontSize: 18, fontWeight: 600, color: "#E8E0D4", marginBottom: 8, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
             {selected.subject}
           </div>
-          <div style={{ fontSize: 12, color: "rgba(232,224,212,0.5)", marginBottom: 4 }}>
+          <div style={{ fontSize: 12, color: "rgba(232,224,212,0.75)", marginBottom: 4 }}>
             From: {selected.from}
           </div>
-          <div style={{ fontSize: 12, color: "rgba(232,224,212,0.35)", marginBottom: 20 }}>
+          <div style={{ fontSize: 12, color: "rgba(232,224,212,0.65)", marginBottom: 20 }}>
             {new Date(selected.date).toLocaleString()}
           </div>
           <div style={{
             fontSize: 14, color: "#E8E0D4", lineHeight: 1.7,
-            whiteSpace: "pre-wrap", borderTop: "1px solid rgba(196,151,59,0.08)",
+            whiteSpace: "pre-wrap", overflowWrap: "break-word", wordBreak: "break-word",
+            borderTop: "1px solid rgba(196,151,59,0.08)",
             paddingTop: 16,
           }}>
             {selected.body}
@@ -136,16 +137,16 @@ export default function EmailsTab({ token, connected, onConnect, needsUpgrade }:
 
   return (
     <div style={{ maxWidth: 720, margin: "0 auto" }}>
-      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 600, marginBottom: 24 }}>Inbox</h2>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, fontWeight: 600, marginBottom: 24 }}>Inbox</h2>
 
       {error && (
         <div style={{ fontSize: 13, color: "#E8735A", marginBottom: 16 }}>{error}</div>
       )}
 
       {loading ? (
-        <div style={{ color: "rgba(232,224,212,0.4)", fontSize: 13 }}>Loading emails...</div>
+        <div style={{ color: "rgba(232,224,212,0.7)", fontSize: 13 }}>Loading emails...</div>
       ) : emails.length === 0 ? (
-        <div style={{ color: "rgba(232,224,212,0.4)", fontSize: 13 }}>No emails found.</div>
+        <div style={{ color: "rgba(232,224,212,0.7)", fontSize: 13 }}>No emails found.</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {emails.map((email) => (
@@ -169,7 +170,7 @@ export default function EmailsTab({ token, connected, onConnect, needsUpgrade }:
                 }}>
                   {email.from.replace(/<.*>/, "").trim()}
                 </span>
-                <span style={{ fontSize: 11, color: "rgba(232,224,212,0.3)", flexShrink: 0 }}>
+                <span style={{ fontSize: 11, color: "rgba(232,224,212,0.6)", flexShrink: 0 }}>
                   {new Date(email.date).toLocaleDateString()}
                 </span>
               </div>
@@ -181,7 +182,7 @@ export default function EmailsTab({ token, connected, onConnect, needsUpgrade }:
                 {email.subject || "(No subject)"}
               </div>
               <div style={{
-                fontSize: 12, color: "rgba(232,224,212,0.35)",
+                fontSize: 12, color: "rgba(232,224,212,0.65)",
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}>
                 {email.snippet}

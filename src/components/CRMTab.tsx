@@ -15,7 +15,7 @@ interface CRMTabProps {
 
 const STAGES = [
   { value: "all", label: "All", color: "" },
-  { value: "lead", label: "Lead", color: "rgba(232,224,212,0.5)" },
+  { value: "lead", label: "Lead", color: "rgba(232,224,212,0.75)" },
   { value: "pitched", label: "Pitched", color: "#5BA4E8" },
   { value: "negotiating", label: "Negotiating", color: "#C4973B" },
   { value: "closed", label: "Closed", color: "#4CAF50" },
@@ -47,8 +47,8 @@ export default function CRMTab({
     return (
       <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center", padding: "60px 20px" }}>
         <div style={{ fontSize: 36, marginBottom: 16 }}>{"\u{1F4C7}"}</div>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, marginBottom: 8 }}>Contacts & Pipeline</h2>
-        <p style={{ fontSize: 13, color: "rgba(232,224,212,0.45)", marginBottom: 24 }}>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 22, fontWeight: 600, marginBottom: 8 }}>Contacts & Pipeline</h2>
+        <p style={{ fontSize: 13, color: "rgba(232,224,212,0.7)", marginBottom: 24 }}>
           Track buyers, manage deals, and log interactions. Available on Professional plan.
         </p>
         <button onClick={onUpgrade} style={{
@@ -112,9 +112,9 @@ export default function CRMTab({
         }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
             <div>
-              <div style={{ fontSize: 22, fontFamily: "'Playfair Display', serif", fontWeight: 600 }}>{selectedContact.name}</div>
+              <div style={{ fontSize: 22, fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 600 }}>{selectedContact.name}</div>
               {selectedContact.company && <div style={{ fontSize: 14, color: "rgba(232,224,212,0.6)", marginTop: 4 }}>{selectedContact.role ? `${selectedContact.role} at ` : ""}{selectedContact.company}</div>}
-              <div style={{ display: "flex", gap: 16, marginTop: 12, fontSize: 12, color: "rgba(232,224,212,0.45)" }}>
+              <div style={{ display: "flex", gap: 16, marginTop: 12, fontSize: 12, color: "rgba(232,224,212,0.7)" }}>
                 {selectedContact.email && <span>{selectedContact.email}</span>}
                 {selectedContact.phone && <span>{selectedContact.phone}</span>}
               </div>
@@ -153,7 +153,7 @@ export default function CRMTab({
               {selectedContact.notes}
             </div>
           )}
-          <div style={{ marginTop: 12, fontSize: 11, color: "rgba(232,224,212,0.3)" }}>
+          <div style={{ marginTop: 12, fontSize: 11, color: "rgba(232,224,212,0.6)" }}>
             Last contacted: {daysAgo(selectedContact.last_contacted_at)}
           </div>
         </div>
@@ -202,11 +202,11 @@ export default function CRMTab({
         </div>
 
         {/* Interaction timeline */}
-        <div style={{ fontSize: 10, color: "rgba(232,224,212,0.35)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 12 }}>
+        <div style={{ fontSize: 10, color: "rgba(232,224,212,0.65)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 12 }}>
           Interaction History
         </div>
         {interactions.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "30px 0", color: "rgba(232,224,212,0.3)", fontSize: 13 }}>
+          <div style={{ textAlign: "center", padding: "30px 0", color: "rgba(232,224,212,0.6)", fontSize: 13 }}>
             No interactions logged yet.
           </div>
         ) : (
@@ -222,7 +222,7 @@ export default function CRMTab({
                   <span style={{ fontSize: 16 }}>{icons[i.type] || "\u{1F4DD}"}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, color: "#E8E0D4" }}>{i.summary}</div>
-                    <div style={{ fontSize: 10, color: "rgba(232,224,212,0.3)", marginTop: 4 }}>
+                    <div style={{ fontSize: 10, color: "rgba(232,224,212,0.6)", marginTop: 4 }}>
                       {i.type.charAt(0).toUpperCase() + i.type.slice(1)} · {new Date(i.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </div>
                   </div>
@@ -239,7 +239,7 @@ export default function CRMTab({
   return (
     <div style={{ maxWidth: 700, margin: "0 auto" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 600 }}>Contacts</h2>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, fontWeight: 600 }}>Contacts</h2>
         <button onClick={() => setShowNew(!showNew)} style={{
           padding: "8px 18px", borderRadius: 8, border: "none",
           background: "linear-gradient(135deg, #8B6914, #C4973B)",
@@ -256,7 +256,7 @@ export default function CRMTab({
             background: filter === s.value ? "rgba(196,151,59,0.06)" : "rgba(255,255,255,0.02)",
           }}>
             <div style={{ fontSize: 20, fontWeight: 700, color: s.color }}>{s.count}</div>
-            <div style={{ fontSize: 9, color: "rgba(232,224,212,0.4)", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>{s.label}</div>
+            <div style={{ fontSize: 9, color: "rgba(232,224,212,0.7)", textTransform: "uppercase", letterSpacing: "0.06em", fontWeight: 600 }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -330,10 +330,10 @@ export default function CRMTab({
           {contacts.length === 0 ? (
             <>
               <div style={{ fontSize: 40, marginBottom: 16, opacity: 0.5 }}>{"\u{1F4C7}"}</div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 600, marginBottom: 8, color: "#E8E0D4" }}>
+              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 18, fontWeight: 600, marginBottom: 8, color: "#E8E0D4" }}>
                 Track your buyers & retailers
               </div>
-              <div style={{ fontSize: 13, color: "rgba(232,224,212,0.4)", lineHeight: 1.6, maxWidth: 360, margin: "0 auto 20px" }}>
+              <div style={{ fontSize: 13, color: "rgba(232,224,212,0.7)", lineHeight: 1.6, maxWidth: 360, margin: "0 auto 20px" }}>
                 Add contacts to manage your pipeline, log interactions, and get AI-powered next-step advice from Marie.
               </div>
               <button onClick={() => setShowNew(true)} style={{
@@ -343,7 +343,7 @@ export default function CRMTab({
               }}>+ Add Your First Contact</button>
             </>
           ) : (
-            <div style={{ color: "rgba(232,224,212,0.3)", fontSize: 13 }}>No contacts in this stage.</div>
+            <div style={{ color: "rgba(232,224,212,0.6)", fontSize: 13 }}>No contacts in this stage.</div>
           )}
         </div>
       ) : (
@@ -359,12 +359,12 @@ export default function CRMTab({
               }}>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "#E8E0D4" }}>{c.name}</div>
-                  <div style={{ fontSize: 12, color: "rgba(232,224,212,0.4)", marginTop: 2 }}>
+                  <div style={{ fontSize: 12, color: "rgba(232,224,212,0.7)", marginTop: 2 }}>
                     {c.company || "No company"}{c.role ? ` · ${c.role}` : ""}
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <span style={{ fontSize: 10, color: "rgba(232,224,212,0.3)" }}>
+                  <span style={{ fontSize: 10, color: "rgba(232,224,212,0.6)" }}>
                     {daysAgo(c.last_contacted_at)}
                   </span>
                   <span style={{
@@ -376,7 +376,7 @@ export default function CRMTab({
                   <button
                     onClick={(e) => { e.stopPropagation(); if (confirm(`Delete ${c.name}?`)) onDelete(c.id); }}
                     style={{
-                      background: "none", border: "none", color: "rgba(232,224,212,0.2)",
+                      background: "none", border: "none", color: "rgba(232,224,212,0.55)",
                       fontSize: 14, cursor: "pointer", padding: "0 4px",
                     }}
                   >{"\u2715"}</button>

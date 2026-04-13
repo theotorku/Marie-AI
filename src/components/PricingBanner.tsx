@@ -19,13 +19,13 @@ export default function PricingBanner({ tier, usage, onUpgrade, onManage }: Pric
             Professional
           </span>
           {usage && (
-            <span style={{ fontSize: 11, color: "rgba(232,224,212,0.4)" }}>
+            <span style={{ fontSize: 11, color: "rgba(232,224,212,0.7)" }}>
               {usage.used}/{usage.limit} messages today
             </span>
           )}
         </div>
         <button onClick={onManage} style={{
-          background: "none", border: "none", color: "rgba(232,224,212,0.4)",
+          background: "none", border: "none", color: "rgba(232,224,212,0.7)",
           fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
         }}>
           Manage billing
@@ -46,7 +46,7 @@ export default function PricingBanner({ tier, usage, onUpgrade, onManage }: Pric
         <div style={{ fontSize: 13, color: "#E8E0D4", fontWeight: 600 }}>
           Upgrade to Professional
         </div>
-        <div style={{ fontSize: 11, color: "rgba(232,224,212,0.4)", marginTop: 2 }}>
+        <div style={{ fontSize: 11, color: "rgba(232,224,212,0.7)", marginTop: 2 }}>
           {usage ? `${usage.remaining} of ${usage.limit} free messages remaining today` : "Unlock Gmail, Calendar, and 100 messages/day"}
           {" \u2014 "}$29/mo
         </div>

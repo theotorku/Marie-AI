@@ -74,7 +74,7 @@ export default function NotificationsPanel({
       >
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ fontSize: 20, fontFamily: "'Playfair Display', serif", fontWeight: 600 }}>
+            <div style={{ fontSize: 20, fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 600 }}>
               Insights
             </div>
             {unreadCount > 0 && (
@@ -90,7 +90,7 @@ export default function NotificationsPanel({
               </span>
             )}
           </div>
-          <div style={{ fontSize: 11, color: "rgba(232,224,212,0.35)", marginTop: 4 }}>
+          <div style={{ fontSize: 11, color: "rgba(232,224,212,0.65)", marginTop: 4 }}>
             Marie is watching your back
           </div>
         </div>
@@ -101,7 +101,7 @@ export default function NotificationsPanel({
               style={{
                 background: "none",
                 border: "1px solid rgba(196,151,59,0.15)",
-                color: "rgba(232,224,212,0.45)",
+                color: "rgba(232,224,212,0.7)",
                 fontSize: 10,
                 padding: "5px 12px",
                 borderRadius: 8,
@@ -121,7 +121,7 @@ export default function NotificationsPanel({
             style={{
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(196,151,59,0.1)",
-              color: "rgba(232,224,212,0.4)",
+              color: "rgba(232,224,212,0.7)",
               fontSize: 16,
               cursor: "pointer",
               padding: "4px 8px",
@@ -175,10 +175,10 @@ export default function NotificationsPanel({
             }}
           >
             <div style={{ fontSize: 40, marginBottom: 16, opacity: 0.4 }}>{"\u2726"}</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 600, marginBottom: 8, color: "#E8E0D4" }}>
+            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 16, fontWeight: 600, marginBottom: 8, color: "#E8E0D4" }}>
               {isPro ? "Your insights will appear here" : "Unlock proactive intelligence"}
             </div>
-            <div style={{ fontSize: 12, color: "rgba(232,224,212,0.35)", lineHeight: 1.6 }}>
+            <div style={{ fontSize: 12, color: "rgba(232,224,212,0.65)", lineHeight: 1.6 }}>
               {isPro
                 ? "Marie will surface briefings, follow-up nudges, meeting prep, and product alerts as they become relevant."
                 : "Upgrade to Professional for daily briefings, follow-up reminders, and smart alerts that keep you ahead."}
@@ -237,7 +237,7 @@ export default function NotificationsPanel({
                       />
                     )}
                   </div>
-                  <span style={{ fontSize: 10, color: "rgba(232,224,212,0.25)" }}>
+                  <span style={{ fontSize: 10, color: "rgba(232,224,212,0.55)" }}>
                     {timeAgo(n.created_at)}
                   </span>
                 </div>
@@ -247,7 +247,7 @@ export default function NotificationsPanel({
                     fontWeight: 600,
                     color: "#E8E0D4",
                     marginBottom: 8,
-                    fontFamily: "'Playfair Display', serif",
+                    fontFamily: "'Cormorant Garamond', Georgia, serif",
                   }}
                 >
                   {n.title}

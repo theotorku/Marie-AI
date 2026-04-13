@@ -55,7 +55,7 @@ export default function Onboarding({
         {step === 0 && (
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: 48, marginBottom: 20 }}>{"\u2726"}</div>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 600, marginBottom: 12 }}>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 32, fontWeight: 600, marginBottom: 12 }}>
               Welcome, {firstName}
             </h1>
             <p style={{ fontSize: 15, color: "rgba(232,224,212,0.6)", lineHeight: 1.7, marginBottom: 32 }}>
@@ -73,10 +73,10 @@ export default function Onboarding({
         {step === 1 && (
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: 48, marginBottom: 20 }}>{"\u{1F517}"}</div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 600, marginBottom: 12 }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 26, fontWeight: 600, marginBottom: 12 }}>
               Connect Your Tools
             </h2>
-            <p style={{ fontSize: 14, color: "rgba(232,224,212,0.5)", marginBottom: 28 }}>
+            <p style={{ fontSize: 14, color: "rgba(232,224,212,0.75)", marginBottom: 28 }}>
               Link your accounts to unlock the full power of Marie AI.
             </p>
 
@@ -89,7 +89,7 @@ export default function Onboarding({
               }}>
                 <div style={{ textAlign: "left" }}>
                   <div style={{ fontSize: 14, fontWeight: 600 }}>Google</div>
-                  <div style={{ fontSize: 11, color: "rgba(232,224,212,0.4)" }}>Gmail & Calendar</div>
+                  <div style={{ fontSize: 11, color: "rgba(232,224,212,0.7)" }}>Gmail & Calendar</div>
                 </div>
                 {googleConnected ? (
                   <span style={{ color: "#4CAF50", fontSize: 12, fontWeight: 600 }}>Connected</span>
@@ -112,7 +112,7 @@ export default function Onboarding({
                 }}>
                   <div style={{ textAlign: "left" }}>
                     <div style={{ fontSize: 14, fontWeight: 600 }}>Professional Plan</div>
-                    <div style={{ fontSize: 11, color: "rgba(232,224,212,0.4)" }}>Unlock Slack, CRM, agent, templates & more</div>
+                    <div style={{ fontSize: 11, color: "rgba(232,224,212,0.7)" }}>Unlock Slack, CRM, agent, templates & more</div>
                   </div>
                   <button onClick={onUpgrade} style={{
                     padding: "8px 16px", borderRadius: 8, border: "none",
@@ -130,7 +130,7 @@ export default function Onboarding({
             }}>Continue</button>
             <div>
               <button onClick={next} style={{
-                background: "none", border: "none", color: "rgba(232,224,212,0.35)",
+                background: "none", border: "none", color: "rgba(232,224,212,0.65)",
                 fontSize: 12, cursor: "pointer", marginTop: 12,
               }}>Skip for now</button>
             </div>
@@ -140,10 +140,10 @@ export default function Onboarding({
         {step === 2 && (
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: 48, marginBottom: 20 }}>{"\u{1F4AC}"}</div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 600, marginBottom: 12 }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 26, fontWeight: 600, marginBottom: 12 }}>
               Try Asking Marie
             </h2>
-            <p style={{ fontSize: 14, color: "rgba(232,224,212,0.5)", marginBottom: 28 }}>
+            <p style={{ fontSize: 14, color: "rgba(232,224,212,0.75)", marginBottom: 28 }}>
               Tap any prompt below to see Marie in action.
             </p>
 
@@ -181,10 +181,10 @@ export default function Onboarding({
         {step === 3 && (
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: 48, marginBottom: 20 }}>{"\u{1F680}"}</div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 600, marginBottom: 12 }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 26, fontWeight: 600, marginBottom: 12 }}>
               You're All Set
             </h2>
-            <p style={{ fontSize: 14, color: "rgba(232,224,212,0.5)", lineHeight: 1.7, marginBottom: 28 }}>
+            <p style={{ fontSize: 14, color: "rgba(232,224,212,0.75)", lineHeight: 1.7, marginBottom: 28 }}>
               Here's what you can do with Marie AI:
             </p>
 
@@ -207,7 +207,7 @@ export default function Onboarding({
                 }}>
                   <span style={{ fontSize: 16 }}>{f.icon}</span>
                   <div style={{ fontSize: 12, fontWeight: 600, marginTop: 6 }}>{f.label}</div>
-                  <div style={{ fontSize: 10, color: "rgba(232,224,212,0.4)", marginTop: 2 }}>{f.desc}</div>
+                  <div style={{ fontSize: 10, color: "rgba(232,224,212,0.7)", marginTop: 2 }}>{f.desc}</div>
                 </div>
               ))}
             </div>

@@ -133,10 +133,10 @@ export default function StudioTab({ token, isPro, onUpgrade, onSendToChat, onSav
     return (
       <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center", padding: "60px 20px" }}>
         <div style={{ fontSize: 36, marginBottom: 16 }}>{"\u2728"}</div>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, marginBottom: 8 }}>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 22, fontWeight: 600, marginBottom: 8 }}>
           Studio
         </h2>
-        <p style={{ fontSize: 13, color: "rgba(232,224,212,0.45)", marginBottom: 24 }}>
+        <p style={{ fontSize: 13, color: "rgba(232,224,212,0.7)", marginBottom: 24 }}>
           Brand-aware creative tools for social captions, press releases, pitch scripts, and more. Available on Professional plan.
         </p>
         <button
@@ -242,7 +242,7 @@ export default function StudioTab({ token, isPro, onUpgrade, onSendToChat, onSav
       <div style={{ marginBottom: 28 }}>
         <h2
           style={{
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "'Cormorant Garamond', Georgia, serif",
             fontSize: 24,
             fontWeight: 600,
             margin: 0,
@@ -254,7 +254,7 @@ export default function StudioTab({ token, isPro, onUpgrade, onSendToChat, onSav
         <p
           style={{
             fontSize: 13,
-            color: "rgba(232,224,212,0.45)",
+            color: "rgba(232,224,212,0.7)",
             margin: 0,
             fontFamily: "'DM Sans', sans-serif",
           }}
@@ -326,7 +326,7 @@ export default function StudioTab({ token, isPro, onUpgrade, onSendToChat, onSav
               <div
                 style={{
                   fontSize: 12,
-                  color: "rgba(232,224,212,0.4)",
+                  color: "rgba(232,224,212,0.7)",
                   lineHeight: 1.4,
                   fontFamily: "'DM Sans', sans-serif",
                 }}
@@ -403,7 +403,7 @@ export default function StudioTab({ token, isPro, onUpgrade, onSendToChat, onSav
               background: generating
                 ? "rgba(196,151,59,0.3)"
                 : "linear-gradient(135deg, #8B6914, #C4973B)",
-              color: generating ? "rgba(232,224,212,0.5)" : "#1A1611",
+              color: generating ? "rgba(232,224,212,0.75)" : "#1A1611",
               fontWeight: 700,
               fontSize: 13,
               cursor: generating ? "not-allowed" : "pointer",

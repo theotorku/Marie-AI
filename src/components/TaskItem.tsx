@@ -44,7 +44,7 @@ export default function TaskItem({ task, onToggle, onDelete }: TaskItemProps) {
         <div
           style={{
             fontSize: 14,
-            color: task.done ? "rgba(232,224,212,0.4)" : "#E8E0D4",
+            color: task.done ? "rgba(232,224,212,0.7)" : "#E8E0D4",
             textDecoration: task.done ? "line-through" : "none",
             fontFamily: "'DM Sans', sans-serif",
           }}
@@ -72,7 +72,7 @@ export default function TaskItem({ task, onToggle, onDelete }: TaskItemProps) {
         style={{
           background: "none",
           border: "none",
-          color: "rgba(232,224,212,0.3)",
+          color: "rgba(232,224,212,0.6)",
           cursor: "pointer",
           fontSize: 16,
           padding: 4,

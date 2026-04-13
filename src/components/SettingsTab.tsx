@@ -50,7 +50,7 @@ function ConnectionCard({
         <div style={{ fontSize: 15, fontWeight: 600, color: "#E8E0D4", marginBottom: 4 }}>
           {name}
         </div>
-        <div style={{ fontSize: 12, color: "rgba(232,224,212,0.45)" }}>
+        <div style={{ fontSize: 12, color: "rgba(232,224,212,0.7)" }}>
           {connected ? (detail || "Connected") : description}
         </div>
       </div>
@@ -127,7 +127,7 @@ export default function SettingsTab({
     <div style={{ maxWidth: 600, margin: "0 auto" }}>
       <h2
         style={{
-          fontFamily: "'Playfair Display', serif",
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
           fontSize: 24,
           fontWeight: 600,
           marginBottom: 8,
@@ -138,7 +138,7 @@ export default function SettingsTab({
       <p
         style={{
           fontSize: 13,
-          color: "rgba(232,224,212,0.4)",
+          color: "rgba(232,224,212,0.7)",
           marginBottom: 28,
         }}
       >
@@ -151,7 +151,7 @@ export default function SettingsTab({
             fontSize: 10,
             textTransform: "uppercase",
             letterSpacing: "0.1em",
-            color: "rgba(232,224,212,0.35)",
+            color: "rgba(232,224,212,0.65)",
             fontWeight: 600,
             marginBottom: 12,
           }}
@@ -191,7 +191,7 @@ export default function SettingsTab({
             fontSize: 10,
             textTransform: "uppercase",
             letterSpacing: "0.1em",
-            color: "rgba(232,224,212,0.35)",
+            color: "rgba(232,224,212,0.65)",
             fontWeight: 600,
             marginBottom: 12,
           }}
@@ -211,7 +211,7 @@ export default function SettingsTab({
               <div style={{ fontSize: 15, fontWeight: 600, color: "#E8E0D4" }}>
                 {isPro ? "Professional" : "Essentials (Free)"}
               </div>
-              <div style={{ fontSize: 12, color: "rgba(232,224,212,0.45)", marginTop: 4 }}>
+              <div style={{ fontSize: 12, color: "rgba(232,224,212,0.7)", marginTop: 4 }}>
                 {isPro
                   ? "Claude Sonnet 4.6 · 100 msgs/day · All integrations"
                   : "Claude Haiku 4.5 · 20 msgs/day · Limited features"}

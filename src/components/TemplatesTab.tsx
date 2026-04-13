@@ -32,10 +32,10 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
     return (
       <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center", padding: "60px 20px" }}>
         <div style={{ fontSize: 36, marginBottom: 16 }}>{"\u2709"}</div>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, marginBottom: 8 }}>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 22, fontWeight: 600, marginBottom: 8 }}>
           Email Templates
         </h2>
-        <p style={{ fontSize: 13, color: "rgba(232,224,212,0.45)", marginBottom: 24 }}>
+        <p style={{ fontSize: 13, color: "rgba(232,224,212,0.7)", marginBottom: 24 }}>
           Save and reuse Marie-generated emails. Available on Professional plan.
         </p>
         <button
@@ -68,7 +68,7 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
   return (
     <div style={{ maxWidth: 700, margin: "0 auto" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 600 }}>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, fontWeight: 600 }}>
           Email Templates
         </h2>
         <button
@@ -166,7 +166,7 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
               padding: "6px 14px", borderRadius: 20,
               border: filter === c.value ? "1px solid #C4973B" : "1px solid rgba(196,151,59,0.15)",
               background: filter === c.value ? "rgba(196,151,59,0.15)" : "transparent",
-              color: filter === c.value ? "#C4973B" : "rgba(232,224,212,0.5)",
+              color: filter === c.value ? "#C4973B" : "rgba(232,224,212,0.75)",
               fontSize: 11, cursor: "pointer",
               fontFamily: "'DM Sans', sans-serif", fontWeight: 600, letterSpacing: "0.04em",
             }}
@@ -178,7 +178,7 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
 
       {/* Template list */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "40px 20px", color: "rgba(232,224,212,0.3)", fontSize: 13 }}>
+        <div style={{ textAlign: "center", padding: "40px 20px", color: "rgba(232,224,212,0.6)", fontSize: 13 }}>
           {templates.length === 0
             ? "No templates yet. Save a Marie-generated email or create one from scratch."
             : "No templates in this category."}
@@ -214,13 +214,13 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
                       {CATEGORIES.find((c) => c.value === t.category)?.label || t.category}
                     </span>
                     {t.subject && (
-                      <span style={{ fontSize: 11, color: "rgba(232,224,212,0.4)" }}>
+                      <span style={{ fontSize: 11, color: "rgba(232,224,212,0.7)" }}>
                         {t.subject}
                       </span>
                     )}
                   </div>
                 </div>
-                <span style={{ color: "rgba(232,224,212,0.3)", fontSize: 12 }}>
+                <span style={{ color: "rgba(232,224,212,0.6)", fontSize: 12 }}>
                   {expanded === t.id ? "\u25B2" : "\u25BC"}
                 </span>
               </div>
@@ -257,7 +257,7 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
                         padding: "8px 16px", borderRadius: 8,
                         border: "1px solid rgba(196,151,59,0.2)",
                         background: "transparent",
-                        color: "rgba(232,224,212,0.5)",
+                        color: "rgba(232,224,212,0.75)",
                         fontSize: 11, cursor: "pointer",
                         fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
                       }}

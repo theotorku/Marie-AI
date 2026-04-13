@@ -21,13 +21,13 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
       border: "1px solid rgba(196,151,59,0.1)",
       background: "rgba(255,255,255,0.02)",
     }}>
-      <div style={{ fontSize: 10, color: "rgba(232,224,212,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 8 }}>
+      <div style={{ fontSize: 10, color: "rgba(232,224,212,0.7)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 8 }}>
         {label}
       </div>
-      <div style={{ fontSize: 28, fontWeight: 700, color: "#C4973B", fontFamily: "'Playfair Display', serif" }}>
+      <div style={{ fontSize: 28, fontWeight: 700, color: "#C4973B", fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
         {value}
       </div>
-      {sub && <div style={{ fontSize: 11, color: "rgba(232,224,212,0.35)", marginTop: 4 }}>{sub}</div>}
+      {sub && <div style={{ fontSize: 11, color: "rgba(232,224,212,0.65)", marginTop: 4 }}>{sub}</div>}
     </div>
   );
 }
@@ -38,7 +38,7 @@ function MiniBar({ label, value, max, color }: { label: string; value: number; m
     <div style={{ marginBottom: 10 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
         <span style={{ fontSize: 12, color: "rgba(232,224,212,0.6)" }}>{label}</span>
-        <span style={{ fontSize: 12, color: "rgba(232,224,212,0.4)" }}>{value}</span>
+        <span style={{ fontSize: 12, color: "rgba(232,224,212,0.7)" }}>{value}</span>
       </div>
       <div style={{ height: 6, borderRadius: 3, background: "rgba(255,255,255,0.06)" }}>
         <div style={{ height: 6, borderRadius: 3, background: color, width: `${pct}%`, transition: "width 0.5s ease" }} />
@@ -61,7 +61,7 @@ function ActivityChart({ data }: { data: { date: string; count: number }[] }) {
               transition: "height 0.5s ease",
             }}
           />
-          <span style={{ fontSize: 9, color: "rgba(232,224,212,0.3)" }}>
+          <span style={{ fontSize: 9, color: "rgba(232,224,212,0.6)" }}>
             {new Date(d.date).toLocaleDateString("en-US", { weekday: "short" }).slice(0, 2)}
           </span>
         </div>
@@ -73,22 +73,27 @@ function ActivityChart({ data }: { data: { date: string; count: number }[] }) {
 export default function AnalyticsTab({ token, isPro, onUpgrade }: AnalyticsTabProps) {
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchAnalytics = () => {
     if (!token) return;
+    setLoading(true);
+    setError(null);
     fetch("/api/analytics", { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => r.json())
+      .then((r) => { if (!r.ok) throw new Error(`Error ${r.status}`); return r.json(); })
       .then((d) => setData(d))
-      .catch(() => {})
+      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load analytics."))
       .finally(() => setLoading(false));
-  }, [token]);
+  };
+
+  useEffect(() => { fetchAnalytics(); }, [token]);
 
   if (!isPro) {
     return (
       <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center", padding: "60px 20px" }}>
         <div style={{ fontSize: 36, marginBottom: 16 }}>{"\u{1F4CA}"}</div>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, marginBottom: 8 }}>Analytics</h2>
-        <p style={{ fontSize: 13, color: "rgba(232,224,212,0.45)", marginBottom: 24 }}>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 22, fontWeight: 600, marginBottom: 8 }}>Analytics</h2>
+        <p style={{ fontSize: 13, color: "rgba(232,224,212,0.7)", marginBottom: 24 }}>
           Track your productivity and usage patterns. Available on Professional plan.
         </p>
         <button onClick={onUpgrade} style={{
@@ -102,10 +107,31 @@ export default function AnalyticsTab({ token, isPro, onUpgrade }: AnalyticsTabPr
     );
   }
 
-  if (loading || !data) {
+  if (loading) {
     return (
-      <div style={{ maxWidth: 700, margin: "0 auto", padding: "40px 0", textAlign: "center", color: "rgba(232,224,212,0.4)" }}>
+      <div style={{ maxWidth: 700, margin: "0 auto", padding: "40px 0", textAlign: "center", color: "rgba(232,224,212,0.7)" }}>
         Loading analytics...
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div style={{ maxWidth: 700, margin: "0 auto", padding: "60px 20px", textAlign: "center" }}>
+        <div style={{ fontSize: 36, marginBottom: 16, opacity: 0.5 }}>{"\u{1F4CA}"}</div>
+        <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 18, fontWeight: 600, marginBottom: 8, color: "#E8E0D4" }}>
+          {error ? "Couldn\u2019t load analytics" : "No data yet"}
+        </div>
+        <div style={{ fontSize: 13, color: "rgba(232,224,212,0.6)", marginBottom: 20 }}>
+          {error || "Start using Marie AI to see your usage analytics here."}
+        </div>
+        <button onClick={fetchAnalytics} style={{
+          padding: "8px 20px", borderRadius: 8, border: "1px solid rgba(196,151,59,0.25)",
+          background: "rgba(196,151,59,0.08)", color: "#C4973B", fontSize: 12, fontWeight: 600,
+          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+        }}>
+          Retry
+        </button>
       </div>
     );
   }
@@ -114,8 +140,8 @@ export default function AnalyticsTab({ token, isPro, onUpgrade }: AnalyticsTabPr
 
   return (
     <div style={{ maxWidth: 700, margin: "0 auto" }}>
-      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 600, marginBottom: 8 }}>Analytics</h2>
-      <p style={{ fontSize: 13, color: "rgba(232,224,212,0.4)", marginBottom: 24 }}>Your Marie AI usage at a glance.</p>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, fontWeight: 600, marginBottom: 8 }}>Analytics</h2>
+      <p style={{ fontSize: 13, color: "rgba(232,224,212,0.7)", marginBottom: 24 }}>Your Marie AI usage at a glance.</p>
 
       {/* Stats grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 12, marginBottom: 28 }}>
@@ -132,7 +158,7 @@ export default function AnalyticsTab({ token, isPro, onUpgrade }: AnalyticsTabPr
         background: "rgba(255,255,255,0.02)",
         marginBottom: 20,
       }}>
-        <div style={{ fontSize: 10, color: "rgba(232,224,212,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 14 }}>
+        <div style={{ fontSize: 10, color: "rgba(232,224,212,0.7)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 14 }}>
           Message Activity (Last 7 Days)
         </div>
         <ActivityChart data={data.messages.byDay} />
@@ -145,7 +171,7 @@ export default function AnalyticsTab({ token, isPro, onUpgrade }: AnalyticsTabPr
           border: "1px solid rgba(196,151,59,0.1)",
           background: "rgba(255,255,255,0.02)",
         }}>
-          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 14 }}>
+          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.7)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 14 }}>
             Tasks by Priority
           </div>
           <MiniBar label="High" value={data.tasks.byPriority.high} max={data.tasks.total} color="#E8735A" />
@@ -158,7 +184,7 @@ export default function AnalyticsTab({ token, isPro, onUpgrade }: AnalyticsTabPr
           border: "1px solid rgba(196,151,59,0.1)",
           background: "rgba(255,255,255,0.02)",
         }}>
-          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 14 }}>
+          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.7)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 14 }}>
             Agent Notifications
           </div>
           {Object.entries(data.notifications.byType).length > 0 ? (
@@ -172,7 +198,7 @@ export default function AnalyticsTab({ token, isPro, onUpgrade }: AnalyticsTabPr
               />
             ))
           ) : (
-            <div style={{ fontSize: 12, color: "rgba(232,224,212,0.3)", padding: "10px 0" }}>No notifications yet</div>
+            <div style={{ fontSize: 12, color: "rgba(232,224,212,0.6)", padding: "10px 0" }}>No notifications yet</div>
           )}
         </div>
       </div>

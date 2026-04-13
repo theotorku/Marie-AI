@@ -15,15 +15,15 @@ function generateSellSheet(products: Product[]): string {
     <head>
       <title>Marie AI — Product Sell Sheet</title>
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'DM Sans', sans-serif; color: #1A1611; padding: 40px; }
         .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #C4973B; padding-bottom: 24px; }
-        .header h1 { font-family: 'Playfair Display', serif; font-size: 32px; color: #1A1611; margin-bottom: 4px; }
+        .header h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 32px; color: #1A1611; margin-bottom: 4px; }
         .header p { font-size: 12px; color: #666; letter-spacing: 0.1em; text-transform: uppercase; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
         .product { border: 1px solid #E0D5C0; border-radius: 8px; padding: 20px; }
-        .product h3 { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 4px; }
+        .product h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 18px; margin-bottom: 4px; }
         .product .meta { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
         .product .desc { font-size: 13px; color: #444; line-height: 1.6; margin-bottom: 8px; }
         .product .price { font-size: 16px; font-weight: 700; color: #8B6914; }
@@ -62,11 +62,11 @@ function generateLineSheet(products: Product[]): string {
     <head>
       <title>Marie AI — Line Sheet</title>
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'DM Sans', sans-serif; color: #1A1611; padding: 40px; }
         .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #C4973B; padding-bottom: 20px; }
-        .header h1 { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 4px; }
+        .header h1 { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 28px; margin-bottom: 4px; }
         .header p { font-size: 12px; color: #666; letter-spacing: 0.1em; text-transform: uppercase; }
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th { background: #1A1611; color: #C4973B; padding: 10px 14px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; text-align: left; }

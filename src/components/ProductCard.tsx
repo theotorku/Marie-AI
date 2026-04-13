@@ -38,17 +38,17 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(196,151,59,0.7)", marginBottom: 6, fontWeight: 600 }}>
         {product.category}
       </div>
-      <div style={{ fontSize: 16, fontWeight: 600, color: "#E8E0D4", marginBottom: 6, fontFamily: "'Playfair Display', serif" }}>
+      <div style={{ fontSize: 16, fontWeight: 600, color: "#E8E0D4", marginBottom: 6, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
         {product.name}
       </div>
       <div style={{ fontSize: 13, color: "rgba(232,224,212,0.6)", lineHeight: 1.5, marginBottom: 10 }}>
         {product.description}
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 18, fontWeight: 700, color: "#C4973B", fontFamily: "'Playfair Display', serif" }}>
+        <span style={{ fontSize: 18, fontWeight: 700, color: "#C4973B", fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
           {product.price}
         </span>
-        <span style={{ fontSize: 11, color: "rgba(232,224,212,0.35)", letterSpacing: "0.05em" }}>
+        <span style={{ fontSize: 11, color: "rgba(232,224,212,0.65)", letterSpacing: "0.05em" }}>
           {product.sku}
         </span>
       </div>

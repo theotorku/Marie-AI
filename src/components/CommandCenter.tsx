@@ -18,19 +18,19 @@ interface CommandCenterProps {
 export function getTimeGradient(): string {
   const hour = new Date().getHours();
   if (hour >= 5 && hour < 12) {
-    // Morning — warm amber
-    return "linear-gradient(135deg, rgba(139,105,20,0.08) 0%, rgba(196,151,59,0.04) 50%, rgba(30,25,18,0) 100%)";
+    // Morning — warm amber tint on dark base
+    return "linear-gradient(160deg, #1E1812 0%, #0D0B09 40%, #1A1510 100%)";
   } else if (hour >= 12 && hour < 18) {
-    // Afternoon — neutral warm
-    return "linear-gradient(135deg, rgba(196,151,59,0.04) 0%, rgba(30,25,18,0) 50%, rgba(232,224,212,0.02) 100%)";
+    // Afternoon — neutral dark
+    return "linear-gradient(160deg, #1A1611 0%, #0D0B09 40%, #14110E 100%)";
   } else {
-    // Evening/night — cool blue-tint
-    return "linear-gradient(135deg, rgba(40,50,80,0.08) 0%, rgba(30,25,18,0) 50%, rgba(91,164,232,0.03) 100%)";
+    // Evening/night — cool blue-tint on dark base
+    return "linear-gradient(160deg, #14151A 0%, #0D0B09 40%, #111318 100%)";
   }
 }
 
 const STAGE_COLORS: Record<string, string> = {
-  lead: "rgba(232,224,212,0.5)",
+  lead: "rgba(232,224,212,0.75)",
   pitched: "#5BA4E8",
   negotiating: "#C4973B",
   closed: "#4CAF50",
@@ -64,7 +64,7 @@ function ScoreArc({ score }: { score: number }) {
         style={{ transition: "stroke-dasharray 0.8s ease" }}
       />
       <text x="45" y="45" textAnchor="middle" dominantBaseline="central"
-        style={{ fontSize: 22, fontWeight: 700, fill: color, fontFamily: "'Playfair Display', serif" }}>
+        style={{ fontSize: 22, fontWeight: 700, fill: color, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
         {score}
       </text>
     </svg>
@@ -117,7 +117,7 @@ export default function CommandCenter({
       {/* Greeting */}
       <div style={{ animation: "fadeUp 0.5s ease-out both" }}>
         <h1 style={{
-          fontFamily: "'Playfair Display', serif",
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
           fontSize: 64,
           fontWeight: 600,
           color: "#E8E0D4",
@@ -128,7 +128,7 @@ export default function CommandCenter({
         </h1>
         <div style={{
           fontSize: 11,
-          color: "rgba(232,224,212,0.35)",
+          color: "rgba(232,224,212,0.65)",
           textTransform: "uppercase",
           letterSpacing: "0.12em",
           fontFamily: "'DM Sans', sans-serif",
@@ -159,7 +159,7 @@ export default function CommandCenter({
         ) : (
           <div style={{ textAlign: "center", padding: "24px 0" }}>
             <p style={{
-              fontSize: 13, color: "rgba(232,224,212,0.35)",
+              fontSize: 13, color: "rgba(232,224,212,0.65)",
               fontFamily: "'DM Sans', sans-serif", marginBottom: 16,
             }}>
               No briefing yet today. Let Marie prepare your morning overview.
@@ -192,23 +192,23 @@ export default function CommandCenter({
       }}>
         {/* Tasks */}
         <div className="cc-card" style={cardStyle(0.25)} onClick={() => onNavigate("tasks")}>
-          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.7)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
             Tasks
           </div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: "#C4973B", fontFamily: "'Playfair Display', serif" }}>
+          <div style={{ fontSize: 32, fontWeight: 700, color: "#C4973B", fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
             {incompleteTasks}
           </div>
-          <div style={{ fontSize: 11, color: "rgba(232,224,212,0.3)", marginTop: 4, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ fontSize: 11, color: "rgba(232,224,212,0.6)", marginTop: 4, fontFamily: "'DM Sans', sans-serif" }}>
             {incompleteTasks === 1 ? "open task" : "open tasks"}
           </div>
         </div>
 
         {/* Pipeline */}
         <div className="cc-card" style={cardStyle(0.35)} onClick={() => onNavigate("contacts")}>
-          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.7)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
             Pipeline
           </div>
-          {pipelineCounts ? (
+          {pipelineCounts && Object.values(pipelineCounts).some((c) => c > 0) ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {(Object.keys(STAGE_COLORS) as Array<keyof typeof STAGE_COLORS>).map((stage) => {
                 const count = pipelineCounts[stage as keyof typeof pipelineCounts] ?? 0;
@@ -227,23 +227,26 @@ export default function CommandCenter({
               })}
             </div>
           ) : (
-            <div style={{ fontSize: 12, color: "rgba(232,224,212,0.3)", fontFamily: "'DM Sans', sans-serif" }}>
-              No pipeline data
-            </div>
+            <>
+              <div style={{ fontSize: 32, fontWeight: 700, color: "#C4973B", fontFamily: "'Cormorant Garamond', Georgia, serif" }}>0</div>
+              <div style={{ fontSize: 11, color: "rgba(232,224,212,0.6)", marginTop: 4, fontFamily: "'DM Sans', sans-serif" }}>
+                contacts — add your first
+              </div>
+            </>
           )}
         </div>
 
         {/* Emails */}
         <div className="cc-card" style={cardStyle(0.45)} onClick={() => onNavigate("emails")}>
-          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.7)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
             Emails
           </div>
           {unreadEmails !== undefined ? (
             <>
-              <div style={{ fontSize: 32, fontWeight: 700, color: "#C4973B", fontFamily: "'Playfair Display', serif" }}>
+              <div style={{ fontSize: 32, fontWeight: 700, color: "#C4973B", fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
                 {unreadEmails}
               </div>
-              <div style={{ fontSize: 11, color: "rgba(232,224,212,0.3)", marginTop: 4, fontFamily: "'DM Sans', sans-serif" }}>
+              <div style={{ fontSize: 11, color: "rgba(232,224,212,0.6)", marginTop: 4, fontFamily: "'DM Sans', sans-serif" }}>
                 unread
               </div>
             </>
@@ -259,24 +262,27 @@ export default function CommandCenter({
 
         {/* Calendar */}
         <div className="cc-card" style={cardStyle(0.55)} onClick={() => onNavigate("calendar")}>
-          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.7)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
             Calendar
           </div>
-          <div style={{ fontSize: 32, fontWeight: 700, color: "#C4973B", fontFamily: "'Playfair Display', serif" }}>
+          <div style={{ fontSize: 32, fontWeight: 700, color: "#C4973B", fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
             {upcomingEvents ?? 0}
           </div>
-          <div style={{ fontSize: 11, color: "rgba(232,224,212,0.3)", marginTop: 4, fontFamily: "'DM Sans', sans-serif" }}>
+          <div style={{ fontSize: 11, color: "rgba(232,224,212,0.6)", marginTop: 4, fontFamily: "'DM Sans', sans-serif" }}>
             upcoming {(upcomingEvents ?? 0) === 1 ? "event" : "events"}
           </div>
         </div>
 
         {/* Marie Score */}
         {marieScore !== undefined && (
-          <div className="cc-card" style={cardStyle(0.65)}>
-            <div style={{ fontSize: 10, color: "rgba(232,224,212,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
+          <div className="cc-card" style={cardStyle(0.65)} title="Your Marie Score measures pipeline health, follow-up consistency, outreach cadence, and task completion. Tap to see the breakdown.">
+            <div style={{ fontSize: 10, color: "rgba(232,224,212,0.7)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
               Marie Score
             </div>
             <ScoreArc score={marieScore} />
+            <div style={{ fontSize: 10, color: "rgba(232,224,212,0.75)", marginTop: 6, fontFamily: "'DM Sans', sans-serif" }}>
+              Pipeline + follow-ups + outreach + tasks
+            </div>
           </div>
         )}
       </div>

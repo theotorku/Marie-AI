@@ -61,13 +61,13 @@ export default function CalendarTab({ token, connected, onConnect, needsUpgrade 
   if (!connected) {
     return (
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 600, marginBottom: 24 }}>Upcoming Events</h2>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, fontWeight: 600, marginBottom: 24 }}>Upcoming Events</h2>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "80px 40px", textAlign: "center" }}>
           <div style={{ fontSize: 48, marginBottom: 20 }}>{"\u25C9"}</div>
-          <div style={{ fontSize: 18, fontFamily: "'Playfair Display', serif", color: "#E8E0D4", marginBottom: 10 }}>
+          <div style={{ fontSize: 18, fontFamily: "'Cormorant Garamond', Georgia, serif", color: "#E8E0D4", marginBottom: 10 }}>
             {needsUpgrade ? "Calendar Integration" : "Connect Calendar"}
           </div>
-          <div style={{ fontSize: 13, color: "rgba(232,224,212,0.4)", maxWidth: 360, lineHeight: 1.7, marginBottom: 4 }}>
+          <div style={{ fontSize: 13, color: "rgba(232,224,212,0.7)", maxWidth: 360, lineHeight: 1.7, marginBottom: 4 }}>
             {needsUpgrade
               ? "View upcoming events, get AI meeting prep briefs, and surface action items."
               : "Link your Google account to view upcoming events, get meeting prep briefs, and surface action items."}
@@ -97,16 +97,16 @@ export default function CalendarTab({ token, connected, onConnect, needsUpgrade 
 
   return (
     <div style={{ maxWidth: 720, margin: "0 auto" }}>
-      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 600, marginBottom: 24 }}>Upcoming Events</h2>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, fontWeight: 600, marginBottom: 24 }}>Upcoming Events</h2>
 
       {error && (
         <div style={{ fontSize: 13, color: "#E8735A", marginBottom: 16 }}>{error}</div>
       )}
 
       {loading ? (
-        <div style={{ color: "rgba(232,224,212,0.4)", fontSize: 13 }}>Loading events...</div>
+        <div style={{ color: "rgba(232,224,212,0.7)", fontSize: 13 }}>Loading events...</div>
       ) : events.length === 0 ? (
-        <div style={{ color: "rgba(232,224,212,0.4)", fontSize: 13 }}>No upcoming events.</div>
+        <div style={{ color: "rgba(232,224,212,0.7)", fontSize: 13 }}>No upcoming events.</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           {Array.from(grouped.entries()).map(([date, dayEvents]) => (
@@ -139,13 +139,13 @@ export default function CalendarTab({ token, connected, onConnect, needsUpgrade 
                         {event.summary}
                       </div>
                       {event.location && (
-                        <div style={{ fontSize: 12, color: "rgba(232,224,212,0.4)" }}>
+                        <div style={{ fontSize: 12, color: "rgba(232,224,212,0.7)" }}>
                           {event.location}
                         </div>
                       )}
                       {event.description && (
                         <div style={{
-                          fontSize: 12, color: "rgba(232,224,212,0.35)",
+                          fontSize: 12, color: "rgba(232,224,212,0.65)",
                           marginTop: 4, lineHeight: 1.5,
                           overflow: "hidden", textOverflow: "ellipsis",
                           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",

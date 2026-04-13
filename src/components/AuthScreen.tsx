@@ -51,9 +51,9 @@ export default function AuthScreen({ onLogin, onRegister }: AuthScreenProps) {
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        input::placeholder { color: rgba(232,224,212,0.3); }
+        input::placeholder { color: rgba(232,224,212,0.6); }
       `}</style>
 
       <div style={{ width: 400, padding: 40 }}>
@@ -64,7 +64,7 @@ export default function AuthScreen({ onLogin, onRegister }: AuthScreenProps) {
             alt="Marie AI"
             style={{ height: 56, width: "auto", objectFit: "contain", marginBottom: 20 }}
           />
-          <div style={{ fontSize: 13, color: "rgba(232,224,212,0.4)" }}>
+          <div style={{ fontSize: 13, color: "rgba(232,224,212,0.7)" }}>
             {mode === "login" ? "Welcome back" : "Create your account"}
           </div>
         </div>

@@ -293,7 +293,7 @@ const TYPE_COLORS: Record<string, string> = {
   email: "#E8735A",
   meeting: "#5BA4E8",
   call: "#4CAF50",
-  note: "rgba(232,224,212,0.35)",
+  note: "rgba(232,224,212,0.65)",
 };
 
 interface TimelineInteraction {
@@ -314,7 +314,7 @@ export function InteractionTimeline({
         style={{
           textAlign: "center",
           padding: "30px 0",
-          color: "rgba(232,224,212,0.3)",
+          color: "rgba(232,224,212,0.6)",
           fontSize: 13,
           fontFamily: "'DM Sans', sans-serif",
         }}
@@ -396,7 +396,7 @@ export function InteractionTimeline({
               <span
                 style={{
                   fontSize: 10,
-                  color: "rgba(232,224,212,0.25)",
+                  color: "rgba(232,224,212,0.55)",
                   fontStyle: "italic",
                   fontFamily: "'DM Sans', sans-serif",
                   padding: "2px 8px",
@@ -454,7 +454,7 @@ export function InteractionTimeline({
               style={{
                 minWidth: 56,
                 fontSize: 10,
-                color: "rgba(232,224,212,0.35)",
+                color: "rgba(232,224,212,0.65)",
                 fontFamily: "'DM Sans', sans-serif",
                 paddingTop: 2,
                 textAlign: "right",
