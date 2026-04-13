@@ -9,6 +9,7 @@ interface CommandCenterProps {
   contactsCount?: number;
   pipelineCounts?: { lead: number; pitched: number; negotiating: number; closed: number; lost: number };
   marieScore?: number;
+  googleConnected?: boolean;
   onNavigate: (tab: string) => void;
   onTriggerBriefing: () => Promise<void>;
   greeting: string;
@@ -73,7 +74,7 @@ function ScoreArc({ score }: { score: number }) {
 
 export default function CommandCenter({
   userName, notifications, tasks, unreadEmails, upcomingEvents,
-  contactsCount: _contactsCount, pipelineCounts, marieScore,
+  contactsCount: _contactsCount, pipelineCounts, marieScore, googleConnected,
   onNavigate, onTriggerBriefing, greeting, dateStr,
 }: CommandCenterProps) {
   const [briefingLoading, setBriefingLoading] = useState(false);
@@ -241,18 +242,18 @@ export default function CommandCenter({
           <div style={{ fontSize: 10, color: "rgba(232,224,212,0.7)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
             Emails
           </div>
-          {unreadEmails !== undefined ? (
+          {googleConnected ? (
             <>
               <div style={{ fontSize: 32, fontWeight: 700, color: "#C4973B", fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-                {unreadEmails}
+                {unreadEmails ?? "\u2709"}
               </div>
               <div style={{ fontSize: 11, color: "rgba(232,224,212,0.6)", marginTop: 4, fontFamily: "'DM Sans', sans-serif" }}>
-                unread
+                {unreadEmails !== undefined ? "unread" : "connected"}
               </div>
             </>
           ) : (
             <div style={{
-              fontSize: 12, color: "rgba(196,151,59,0.5)",
+              fontSize: 12, color: "rgba(196,151,59,0.7)",
               fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
             }}>
               Connect Gmail
@@ -270,6 +271,17 @@ export default function CommandCenter({
           </div>
           <div style={{ fontSize: 11, color: "rgba(232,224,212,0.6)", marginTop: 4, fontFamily: "'DM Sans', sans-serif" }}>
             upcoming {(upcomingEvents ?? 0) === 1 ? "event" : "events"}
+          </div>
+        </div>
+
+        {/* Studio */}
+        <div className="cc-card" style={cardStyle(0.55)} onClick={() => onNavigate("studio")}>
+          <div style={{ fontSize: 10, color: "rgba(232,224,212,0.7)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
+            Studio
+          </div>
+          <div style={{ fontSize: 32, opacity: 0.6 }}>{"\u2605"}</div>
+          <div style={{ fontSize: 11, color: "rgba(232,224,212,0.6)", marginTop: 4, fontFamily: "'DM Sans', sans-serif" }}>
+            creative tools
           </div>
         </div>
 

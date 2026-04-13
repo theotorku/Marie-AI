@@ -119,14 +119,22 @@ export default function CalendarTab({ token, connected, onConnect, needsUpgrade 
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {dayEvents.map((event) => (
-                  <div
+                  <a
                     key={event.id}
+                    href={event.htmlLink || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={{
                       padding: "14px 18px", borderRadius: 12,
                       background: "rgba(255,255,255,0.03)",
                       border: "1px solid rgba(196,151,59,0.1)",
                       display: "flex", gap: 16, alignItems: "flex-start",
+                      textDecoration: "none", color: "inherit",
+                      cursor: event.htmlLink ? "pointer" : "default",
+                      transition: "all 0.2s",
                     }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(196,151,59,0.25)"; e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(196,151,59,0.1)"; e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}
                   >
                     <div style={{
                       fontSize: 13, color: "#C4973B", fontWeight: 600,
@@ -135,8 +143,15 @@ export default function CalendarTab({ token, connected, onConnect, needsUpgrade 
                       {formatTime(event.start)}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: "#E8E0D4", marginBottom: 2 }}>
-                        {event.summary}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: "#E8E0D4", marginBottom: 2 }}>
+                          {event.summary}
+                        </div>
+                        {event.htmlLink && (
+                          <span style={{ fontSize: 10, color: "rgba(232,224,212,0.5)", flexShrink: 0 }}>
+                            Open in Calendar {"\u2197"}
+                          </span>
+                        )}
                       </div>
                       {event.location && (
                         <div style={{ fontSize: 12, color: "rgba(232,224,212,0.7)" }}>
@@ -154,7 +169,7 @@ export default function CalendarTab({ token, connected, onConnect, needsUpgrade 
                         </div>
                       )}
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>

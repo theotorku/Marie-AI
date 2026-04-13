@@ -201,6 +201,28 @@ export default function App() {
         .markdown-body ul:last-child, .markdown-body ol:last-child { margin-bottom: 0 !important; }
         input, textarea, select { font-family: 'DM Sans', sans-serif; }
 
+        /* Focus ring — WCAG 2.4.7 */
+        :focus-visible {
+          outline: 2px solid #C4973B !important;
+          outline-offset: 2px;
+        }
+        button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
+
+        /* Dark-themed select dropdowns */
+        select {
+          appearance: none;
+          -webkit-appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C4973B' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 10px center;
+          padding-right: 30px !important;
+        }
+        select option {
+          background: #1A1611;
+          color: #E8E0D4;
+          padding: 8px;
+        }
+
         /* Glass card utility */
         .glass-card {
           background: rgba(255,255,255,0.03);
@@ -391,6 +413,7 @@ export default function App() {
                 contactsCount={crm.contacts.length}
                 pipelineCounts={pipelineCounts}
                 marieScore={marieScore.score ?? undefined}
+                googleConnected={google.connected && billing.gmail}
                 onNavigate={setActiveTab}
                 onTriggerBriefing={notifs.triggerBriefing}
                 greeting={greeting}
@@ -560,9 +583,9 @@ export default function App() {
           {/* Products */}
           {activeTab === "products" && (
             <div style={{ maxWidth: 800, margin: "0 auto" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, gap: 16, flexWrap: "wrap" }}>
                 <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, fontWeight: 600 }}>Product Reference</h2>
-                <div style={{ display: "flex", gap: 6 }}>
+                <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                   <button
                     onClick={() => exportPDF({ products: filteredProducts, type: "sell-sheet" })}
                     style={{
@@ -665,10 +688,13 @@ export default function App() {
                 </select>
                 <button
                   onClick={addTask}
+                  disabled={!newTask.trim()}
                   style={{
                     padding: "12px 20px", borderRadius: 12, border: "none",
-                    background: "linear-gradient(135deg, #8B6914, #C4973B)",
-                    color: "#1A1611", fontWeight: 700, fontSize: 14, cursor: "pointer",
+                    background: !newTask.trim() ? "rgba(196,151,59,0.2)" : "linear-gradient(135deg, #8B6914, #C4973B)",
+                    color: "#1A1611", fontWeight: 700, fontSize: 14,
+                    cursor: !newTask.trim() ? "not-allowed" : "pointer",
+                    transition: "all 0.2s",
                   }}
                 >
                   Add

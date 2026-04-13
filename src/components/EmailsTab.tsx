@@ -25,6 +25,12 @@ interface EmailsTabProps {
   needsUpgrade?: boolean;
 }
 
+function decodeEntities(text: string): string {
+  const el = document.createElement("textarea");
+  el.innerHTML = text;
+  return el.value;
+}
+
 export default function EmailsTab({ token, connected, onConnect, needsUpgrade }: EmailsTabProps) {
   const [emails, setEmails] = useState<Email[]>([]);
   const [selected, setSelected] = useState<EmailDetail | null>(null);
@@ -179,13 +185,13 @@ export default function EmailsTab({ token, connected, onConnect, needsUpgrade }:
                 fontWeight: email.unread ? 600 : 400,
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}>
-                {email.subject || "(No subject)"}
+                {email.subject ? decodeEntities(email.subject) : "(No subject)"}
               </div>
               <div style={{
                 fontSize: 12, color: "rgba(232,224,212,0.65)",
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}>
-                {email.snippet}
+                {decodeEntities(email.snippet)}
               </div>
             </button>
           ))}
