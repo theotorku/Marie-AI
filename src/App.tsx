@@ -22,15 +22,21 @@ import AnalyticsTab from "./components/AnalyticsTab";
 import CRMTab from "./components/CRMTab";
 import Onboarding from "./components/Onboarding";
 import { exportPDF } from "./components/PDFExport";
+import CommandCenter, { getTimeGradient } from "./components/CommandCenter";
+import StudioTab from "./components/StudioTab";
+import MarieScore from "./components/MarieScore";
+import HandsFreeToggle from "./components/HandsFreeToggle";
 import { useCRM } from "./hooks/useCRM";
 import { useSlack } from "./hooks/useSlack";
 import { useTemplates } from "./hooks/useTemplates";
 import { useVoiceInput } from "./hooks/useVoiceInput";
+import { useVoiceOutput } from "./hooks/useVoiceOutput";
+import { useMarieScore } from "./hooks/useMarieScore";
 import type { Task } from "./types";
 
 export default function App() {
   const auth = useAuth();
-  const [activeTab, setActiveTab] = useState("chat");
+  const [activeTab, setActiveTab] = useState("home");
   const { messages, loading, error, sendMessage, stopGeneration } = useChat(auth.token);
   const google = useGoogle(auth.token);
   const taskStore = useTasks(auth.token);
@@ -40,6 +46,8 @@ export default function App() {
   const templateStore = useTemplates(auth.token);
   const crm = useCRM(auth.token);
   const voice = useVoiceInput((transcript) => setInput((prev) => prev ? `${prev} ${transcript}` : transcript));
+  const voiceOut = useVoiceOutput();
+  const marieScore = useMarieScore(auth.token);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -78,7 +86,14 @@ export default function App() {
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    // Auto-speak last AI response in hands-free mode
+    if (voiceOut.handsFree && messages.length > 0) {
+      const last = messages[messages.length - 1];
+      if (last.role === "assistant" && !loading) {
+        voiceOut.speak(last.content);
+      }
+    }
+  }, [messages, loading]);
 
   if (auth.loading) {
     return (
@@ -120,8 +135,15 @@ export default function App() {
 
   const greeting = time.getHours() < 12 ? "Good Morning" : time.getHours() < 17 ? "Good Afternoon" : "Good Evening";
   const dateStr = time.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-  const tabLabels: Record<string, string> = { chat: greeting, emails: "Inbox", calendar: "Calendar", contacts: "Contacts", products: "Product Reference", templates: "Templates", analytics: "Analytics", tasks: "Daily Tasks", settings: "Settings" };
+  const tabLabels: Record<string, string> = { home: greeting, chat: "Assistant", emails: "Inbox", calendar: "Calendar", contacts: "Contacts", studio: "Studio", products: "Product Reference", templates: "Templates", analytics: "Analytics", tasks: "Daily Tasks", settings: "Settings" };
   const headerTitle = tabLabels[activeTab] || greeting;
+  const pipelineCounts = {
+    lead: crm.contacts.filter((c) => c.stage === "lead").length,
+    pitched: crm.contacts.filter((c) => c.stage === "pitched").length,
+    negotiating: crm.contacts.filter((c) => c.stage === "negotiating").length,
+    closed: crm.contacts.filter((c) => c.stage === "closed").length,
+    lost: crm.contacts.filter((c) => c.stage === "lost").length,
+  };
   const charsLeft = CONFIG.maxInputChars - input.length;
 
   const filteredProducts =
@@ -155,16 +177,21 @@ export default function App() {
     <div
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(160deg, #1A1611 0%, #0D0B09 40%, #14110E 100%)",
+        background: getTimeGradient(),
         fontFamily: "'DM Sans', sans-serif",
         color: "#E8E0D4",
         display: "flex",
+        transition: "background 2s ease",
       }}
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
         @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        @keyframes subtleFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+        @keyframes glowPulse { 0%, 100% { box-shadow: 0 0 0 rgba(196,151,59,0); } 50% { box-shadow: 0 0 20px rgba(196,151,59,0.08); } }
+        @keyframes soundWave { 0%, 100% { height: 4px; } 50% { height: 14px; } }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -172,6 +199,33 @@ export default function App() {
         .markdown-body p:last-child { margin-bottom: 0 !important; }
         .markdown-body ul:last-child, .markdown-body ol:last-child { margin-bottom: 0 !important; }
         input, textarea, select { font-family: 'DM Sans', sans-serif; }
+
+        /* Glass card utility */
+        .glass-card {
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(196,151,59,0.1);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-radius: 16px;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+          transform: translateY(-2px);
+          border-color: rgba(196,151,59,0.2);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(196,151,59,0.08);
+        }
+
+        /* Sidebar nav hover micro-animation */
+        .nav-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+        .nav-btn:hover { background: rgba(196,151,59,0.1) !important; transform: scale(1.05); }
+
+        /* Section accent tints on hover */
+        .accent-emails:hover { border-color: rgba(232,160,191,0.3) !important; }
+        .accent-calendar:hover { border-color: rgba(212,197,160,0.3) !important; }
+        .accent-contacts:hover { border-color: rgba(91,164,232,0.3) !important; }
+        .accent-products:hover { border-color: rgba(180,120,80,0.3) !important; }
+        .accent-analytics:hover { border-color: rgba(160,196,168,0.3) !important; }
+
         .sidebar { display: flex; }
         .sidebar-toggle { display: none; }
         .sidebar-overlay { display: none; }
@@ -212,6 +266,7 @@ export default function App() {
         {TABS.map((tab) => (
           <button
             key={tab.id}
+            className="nav-btn"
             onClick={() => { setActiveTab(tab.id); setSidebarOpen(false); }}
             title={tab.label}
             style={{
@@ -220,7 +275,7 @@ export default function App() {
               color: activeTab === tab.id ? "#D4A84B" : "rgba(232,224,212,0.35)",
               cursor: "pointer",
               display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-              gap: 2, transition: "all 0.2s", position: "relative",
+              gap: 2, position: "relative",
             }}
           >
             {activeTab === tab.id && (
@@ -253,9 +308,9 @@ export default function App() {
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>{"\u2630"}</button>
             <div>
-            <div style={{ fontSize: 22, fontFamily: "'Playfair Display', serif", fontWeight: 600 }}>{headerTitle}</div>
+            <div style={{ fontSize: 24, fontFamily: "'Cormorant Garamond', serif", fontWeight: 600, letterSpacing: "-0.01em" }}>{headerTitle}</div>
             <div style={{ fontSize: 12, color: "rgba(232,224,212,0.45)", letterSpacing: "0.06em", textTransform: "uppercase", marginTop: 2 }}>
-              {activeTab === "chat" ? `${dateStr} · Marie AI` : dateStr}
+              {activeTab === "home" || activeTab === "chat" ? `${dateStr} · Marie AI` : dateStr}
             </div>
             </div>
           </div>
@@ -310,6 +365,34 @@ export default function App() {
 
         {/* Tab Content */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: activeTab === "chat" ? "hidden" : "auto", padding: activeTab === "chat" ? 0 : 32 }}>
+          {/* Home — Command Center */}
+          {activeTab === "home" && (
+            <div style={{ maxWidth: 800, margin: "0 auto", width: "100%" }}>
+              <CommandCenter
+                userName={auth.user.name}
+                notifications={notifs.notifications}
+                tasks={taskStore.tasks}
+                contactsCount={crm.contacts.length}
+                pipelineCounts={pipelineCounts}
+                marieScore={marieScore.score ?? undefined}
+                onNavigate={setActiveTab}
+                onTriggerBriefing={notifs.triggerBriefing}
+                greeting={greeting}
+                dateStr={dateStr}
+              />
+              {marieScore.score !== null && (
+                <div style={{ marginTop: 32 }}>
+                  <MarieScore
+                    score={marieScore.score}
+                    breakdown={marieScore.breakdown}
+                    trend={marieScore.trend}
+                    loading={marieScore.loading}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Chat */}
           {activeTab === "chat" && (
             <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, maxWidth: 720, margin: "0 auto", width: "100%", padding: "0 32px" }}>
@@ -357,7 +440,13 @@ export default function App() {
 
               {/* Input bar - pinned to bottom */}
               <div style={{ flexShrink: 0, paddingBottom: 16, paddingTop: 8, borderTop: "1px solid rgba(196,151,59,0.06)" }}>
-                <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <HandsFreeToggle
+                    handsFree={voiceOut.handsFree}
+                    onToggle={voiceOut.toggleHandsFree}
+                    speaking={voiceOut.speaking}
+                    supported={voiceOut.supported}
+                  />
                   <input
                     value={input}
                     onChange={(e) => setInput(e.target.value.slice(0, CONFIG.maxInputChars))}
@@ -438,6 +527,17 @@ export default function App() {
               onAskMarie={(prompt) => { setInput(prompt); setActiveTab("chat"); }}
               isPro={billing.tier === "professional"}
               onUpgrade={billing.upgrade}
+            />
+          )}
+
+          {/* Studio */}
+          {activeTab === "studio" && (
+            <StudioTab
+              token={auth.token}
+              isPro={billing.tier === "professional"}
+              onUpgrade={billing.upgrade}
+              onSendToChat={(text) => { setInput(text); setActiveTab("chat"); }}
+              onSaveTemplate={(t) => templateStore.save(t)}
             />
           )}
 
