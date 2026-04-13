@@ -1,6 +1,13 @@
 -- Marie AI database schema
 -- Run this in the Supabase SQL Editor to set up tables
 
+-- Waitlist (early access signups)
+create table if not exists waitlist (
+  id serial primary key,
+  email text unique not null,
+  created_at timestamptz default now()
+);
+
 -- Users
 create table if not exists users (
   id uuid primary key default gen_random_uuid(),
