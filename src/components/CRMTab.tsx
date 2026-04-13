@@ -326,8 +326,25 @@ export default function CRMTab({
 
       {/* Contact list */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "40px 20px", color: "rgba(232,224,212,0.3)", fontSize: 13 }}>
-          {contacts.length === 0 ? "No contacts yet. Add your first buyer or retailer." : "No contacts in this stage."}
+        <div style={{ textAlign: "center", padding: "48px 20px" }}>
+          {contacts.length === 0 ? (
+            <>
+              <div style={{ fontSize: 40, marginBottom: 16, opacity: 0.5 }}>{"\u{1F4C7}"}</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 600, marginBottom: 8, color: "#E8E0D4" }}>
+                Track your buyers & retailers
+              </div>
+              <div style={{ fontSize: 13, color: "rgba(232,224,212,0.4)", lineHeight: 1.6, maxWidth: 360, margin: "0 auto 20px" }}>
+                Add contacts to manage your pipeline, log interactions, and get AI-powered next-step advice from Marie.
+              </div>
+              <button onClick={() => setShowNew(true)} style={{
+                padding: "10px 24px", borderRadius: 10, border: "none",
+                background: "linear-gradient(135deg, #8B6914, #C4973B)",
+                color: "#1A1611", fontWeight: 700, fontSize: 13, cursor: "pointer",
+              }}>+ Add Your First Contact</button>
+            </>
+          ) : (
+            <div style={{ color: "rgba(232,224,212,0.3)", fontSize: 13 }}>No contacts in this stage.</div>
+          )}
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

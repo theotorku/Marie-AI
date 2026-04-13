@@ -31,7 +31,7 @@ import type { Task } from "./types";
 export default function App() {
   const auth = useAuth();
   const [activeTab, setActiveTab] = useState("chat");
-  const { messages, loading, error, sendMessage } = useChat(auth.token);
+  const { messages, loading, error, sendMessage, stopGeneration } = useChat(auth.token);
   const google = useGoogle(auth.token);
   const taskStore = useTasks(auth.token);
   const billing = useBilling(auth.token);
@@ -120,6 +120,8 @@ export default function App() {
 
   const greeting = time.getHours() < 12 ? "Good Morning" : time.getHours() < 17 ? "Good Afternoon" : "Good Evening";
   const dateStr = time.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+  const tabLabels: Record<string, string> = { chat: greeting, emails: "Inbox", calendar: "Calendar", contacts: "Contacts", products: "Product Reference", templates: "Templates", analytics: "Analytics", tasks: "Daily Tasks", settings: "Settings" };
+  const headerTitle = tabLabels[activeTab] || greeting;
   const charsLeft = CONFIG.maxInputChars - input.length;
 
   const filteredProducts =
@@ -167,6 +169,8 @@ export default function App() {
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(196,151,59,0.2); border-radius: 4px; }
+        .markdown-body p:last-child { margin-bottom: 0 !important; }
+        .markdown-body ul:last-child, .markdown-body ol:last-child { margin-bottom: 0 !important; }
         input, textarea, select { font-family: 'DM Sans', sans-serif; }
         .sidebar { display: flex; }
         .sidebar-toggle { display: none; }
@@ -212,8 +216,8 @@ export default function App() {
             title={tab.label}
             style={{
               width: 48, height: 48, borderRadius: 12, border: "none",
-              background: activeTab === tab.id ? "rgba(196,151,59,0.15)" : "transparent",
-              color: activeTab === tab.id ? "#C4973B" : "rgba(232,224,212,0.35)",
+              background: activeTab === tab.id ? "rgba(196,151,59,0.18)" : "transparent",
+              color: activeTab === tab.id ? "#D4A84B" : "rgba(232,224,212,0.35)",
               cursor: "pointer",
               display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
               gap: 2, transition: "all 0.2s", position: "relative",
@@ -224,7 +228,8 @@ export default function App() {
                 style={{
                   position: "absolute", left: -12, top: "50%",
                   transform: "translateY(-50%)",
-                  width: 3, height: 20, borderRadius: 2, background: "#C4973B",
+                  width: 3, height: 28, borderRadius: 2, background: "#C4973B",
+                  boxShadow: "0 0 8px rgba(196,151,59,0.4)",
                 }}
               />
             )}
@@ -248,9 +253,9 @@ export default function App() {
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>{"\u2630"}</button>
             <div>
-            <div style={{ fontSize: 22, fontFamily: "'Playfair Display', serif", fontWeight: 600 }}>{greeting}</div>
+            <div style={{ fontSize: 22, fontFamily: "'Playfair Display', serif", fontWeight: 600 }}>{headerTitle}</div>
             <div style={{ fontSize: 12, color: "rgba(232,224,212,0.45)", letterSpacing: "0.06em", textTransform: "uppercase", marginTop: 2 }}>
-              {dateStr} · Marie AI
+              {activeTab === "chat" ? `${dateStr} · Marie AI` : dateStr}
             </div>
             </div>
           </div>
@@ -304,21 +309,39 @@ export default function App() {
         </div>
 
         {/* Tab Content */}
-        <div style={{ flex: 1, overflow: "auto", padding: 32 }}>
-          {!billing.loading && (
-            <div style={{ maxWidth: 720, margin: "0 auto" }}>
-              <PricingBanner
-                tier={billing.tier}
-                usage={billing.usage}
-                onUpgrade={billing.upgrade}
-                onManage={billing.manage}
-              />
-            </div>
-          )}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: activeTab === "chat" ? "hidden" : "auto", padding: activeTab === "chat" ? 0 : 32 }}>
           {/* Chat */}
           {activeTab === "chat" && (
-            <div style={{ display: "flex", flexDirection: "column", height: "100%", maxWidth: 720, margin: "0 auto" }}>
-              <div style={{ flex: 1, overflow: "auto", paddingBottom: 16 }}>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, maxWidth: 720, margin: "0 auto", width: "100%", padding: "0 32px" }}>
+              {/* Billing banner - chat only */}
+              {!billing.loading && (
+                <div style={{ flexShrink: 0, paddingTop: 16 }}>
+                  <PricingBanner
+                    tier={billing.tier}
+                    usage={billing.usage}
+                    onUpgrade={billing.upgrade}
+                    onManage={billing.manage}
+                  />
+                </div>
+              )}
+
+              {/* Messages area */}
+              <div style={{ flex: 1, overflowY: "auto", minHeight: 0, paddingBottom: 16, paddingTop: 8 }}>
+                {messages.length === 0 && !loading && (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "48px 20px", gap: 24 }}>
+                    <div style={{ fontSize: 36, opacity: 0.6 }}>{"\u2726"}</div>
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 600, marginBottom: 8 }}>How can I help you today?</div>
+                      <div style={{ fontSize: 13, color: "rgba(232,224,212,0.4)" }}>Try one of these to get started</div>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+                      <QuickAction label="Draft buyer email" onClick={() => handleSend("Help me draft a professional follow-up email to a retail buyer about our Q2 performance and upcoming product launches.")} />
+                      <QuickAction label="Meeting prep" onClick={() => handleSend("Help me prepare a structured agenda for a quarterly business review with a retail buyer team.")} />
+                      <QuickAction label="Product FAQ" onClick={() => handleSend("Give me talking points for our top 3 hero SKUs — key differentiators, price points, and ideal customer profile.")} />
+                      <QuickAction label="Daily briefing" onClick={() => handleSend("Give me a quick daily briefing: what should I prioritize today, and what follow-ups should I handle first?")} />
+                    </div>
+                  </div>
+                )}
                 {messages.map((m, i) => (
                   <ChatBubble key={i} role={m.role} content={m.content} />
                 ))}
@@ -332,66 +355,63 @@ export default function App() {
                 <div ref={chatEndRef} />
               </div>
 
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
-                  <QuickAction label="Draft buyer email" onClick={() => handleSend("Help me draft a professional follow-up email to a retail buyer about our Q2 performance and upcoming product launches.")} />
-                  <QuickAction label="Meeting prep" onClick={() => handleSend("Help me prepare a structured agenda for a quarterly business review with a retail buyer team.")} />
-                  <QuickAction label="Product FAQ" onClick={() => handleSend("Give me talking points for our top 3 hero SKUs — key differentiators, price points, and ideal customer profile.")} />
-                  <QuickAction label="Daily briefing" onClick={() => handleSend("Give me a quick daily briefing: what should I prioritize today, and what follow-ups should I handle first?")} />
-                </div>
-
-                <div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <input
-                      value={input}
-                      onChange={(e) => setInput(e.target.value.slice(0, CONFIG.maxInputChars))}
-                      onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend(input)}
-                      placeholder="Ask Marie AI anything..."
-                      disabled={loading}
-                      style={{
-                        flex: 1, padding: "14px 20px", borderRadius: 16,
-                        border: `1px solid ${charsLeft < 100 ? "rgba(232,115,90,0.4)" : "rgba(196,151,59,0.2)"}`,
-                        background: "rgba(255,255,255,0.04)", color: "#E8E0D4", fontSize: 14, outline: "none",
-                      }}
-                    />
-                    {voice.supported && (
-                      <button
-                        onClick={voice.toggle}
-                        disabled={loading}
-                        title={voice.listening ? "Stop listening" : "Voice input"}
-                        style={{
-                          padding: "14px 16px", borderRadius: 16,
-                          border: voice.listening ? "1px solid #C4973B" : "1px solid rgba(196,151,59,0.2)",
-                          background: voice.listening ? "rgba(196,151,59,0.15)" : "rgba(255,255,255,0.04)",
-                          color: voice.listening ? "#C4973B" : "rgba(232,224,212,0.5)",
-                          fontSize: 16, cursor: loading ? "not-allowed" : "pointer",
-                          transition: "all 0.2s",
-                          animation: voice.listening ? "pulse 1.5s infinite" : "none",
-                        }}
-                      >
-                        {"\u{1F3A4}"}
-                      </button>
-                    )}
+              {/* Input bar - pinned to bottom */}
+              <div style={{ flexShrink: 0, paddingBottom: 16, paddingTop: 8, borderTop: "1px solid rgba(196,151,59,0.06)" }}>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value.slice(0, CONFIG.maxInputChars))}
+                    onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend(input)}
+                    placeholder="Ask Marie AI anything..."
+                    disabled={loading}
+                    style={{
+                      flex: 1, padding: "14px 20px", borderRadius: 16,
+                      border: `1px solid ${charsLeft < 100 ? "rgba(232,115,90,0.4)" : "rgba(196,151,59,0.2)"}`,
+                      background: "rgba(255,255,255,0.04)", color: "#E8E0D4", fontSize: 14, outline: "none",
+                    }}
+                  />
+                  {voice.supported && (
                     <button
-                      onClick={() => handleSend(input)}
-                      disabled={loading || !input.trim()}
+                      onClick={voice.toggle}
+                      disabled={loading}
+                      title={voice.listening ? "Stop listening" : "Voice input"}
                       style={{
-                        padding: "14px 24px", borderRadius: 16, border: "none",
-                        background: loading || !input.trim() ? "rgba(196,151,59,0.2)" : "linear-gradient(135deg, #8B6914, #C4973B)",
-                        color: "#1A1611", fontWeight: 700, fontSize: 14,
-                        cursor: loading || !input.trim() ? "not-allowed" : "pointer",
-                        letterSpacing: "0.02em", transition: "all 0.2s",
+                        padding: "14px 16px", borderRadius: 16,
+                        border: voice.listening ? "1px solid #C4973B" : "1px solid rgba(196,151,59,0.2)",
+                        background: voice.listening ? "rgba(196,151,59,0.15)" : "rgba(255,255,255,0.04)",
+                        color: voice.listening ? "#C4973B" : "rgba(232,224,212,0.5)",
+                        fontSize: 16, cursor: loading ? "not-allowed" : "pointer",
+                        transition: "all 0.2s",
+                        animation: voice.listening ? "pulse 1.5s infinite" : "none",
                       }}
                     >
-                      Send
+                      {"\u{1F3A4}"}
                     </button>
-                  </div>
-                  {charsLeft < 200 && (
-                    <div style={{ textAlign: "right", fontSize: 11, marginTop: 6, color: charsLeft < 50 ? "#E8735A" : "rgba(232,224,212,0.35)" }}>
-                      {charsLeft} chars remaining
-                    </div>
                   )}
+                  <button
+                    onClick={loading ? stopGeneration : () => handleSend(input)}
+                    disabled={!loading && !input.trim()}
+                    style={{
+                      padding: "14px 24px", borderRadius: 16, border: "none",
+                      background: loading
+                        ? "rgba(232,115,90,0.2)"
+                        : !input.trim()
+                          ? "rgba(196,151,59,0.2)"
+                          : "linear-gradient(135deg, #8B6914, #C4973B)",
+                      color: loading ? "#E8735A" : "#1A1611",
+                      fontWeight: 700, fontSize: 14,
+                      cursor: loading ? "pointer" : !input.trim() ? "not-allowed" : "pointer",
+                      letterSpacing: "0.02em", transition: "all 0.2s",
+                    }}
+                  >
+                    {loading ? "Stop" : "Send"}
+                  </button>
                 </div>
+                {charsLeft < 200 && (
+                  <div style={{ textAlign: "right", fontSize: 11, marginTop: 6, color: charsLeft < 50 ? "#E8735A" : "rgba(232,224,212,0.35)" }}>
+                    {charsLeft} chars remaining
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -424,46 +444,46 @@ export default function App() {
           {/* Products */}
           {activeTab === "products" && (
             <div style={{ maxWidth: 800, margin: "0 auto" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 600 }}>Product Reference</h2>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {["all", "hero", "face", "cheeks", "lips", "multi-use"].map((f) => (
-                    <button
-                      key={f}
-                      onClick={() => setProductFilter(f)}
-                      style={{
-                        padding: "6px 14px", borderRadius: 20,
-                        border: productFilter === f ? "1px solid #C4973B" : "1px solid rgba(196,151,59,0.15)",
-                        background: productFilter === f ? "rgba(196,151,59,0.15)" : "transparent",
-                        color: productFilter === f ? "#C4973B" : "rgba(232,224,212,0.5)",
-                        fontSize: 11, cursor: "pointer", textTransform: "capitalize",
-                        fontFamily: "'DM Sans', sans-serif", fontWeight: 600, letterSpacing: "0.04em",
-                      }}
-                    >
-                      {f}
-                    </button>
-                  ))}
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button
+                    onClick={() => exportPDF({ products: filteredProducts, type: "sell-sheet" })}
+                    style={{
+                      padding: "8px 16px", borderRadius: 8,
+                      border: "1px solid rgba(196,151,59,0.25)", background: "rgba(196,151,59,0.08)",
+                      color: "#C4973B", fontSize: 11, fontWeight: 600, cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em",
+                    }}
+                  >Export Sell Sheet</button>
+                  <button
+                    onClick={() => exportPDF({ products: PRODUCT_KB, type: "line-sheet" })}
+                    style={{
+                      padding: "8px 16px", borderRadius: 8,
+                      border: "none", background: "linear-gradient(135deg, #8B6914, #C4973B)",
+                      color: "#1A1611", fontSize: 11, fontWeight: 700, cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em",
+                    }}
+                  >Export Line Sheet</button>
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                <button
-                  onClick={() => exportPDF({ products: filteredProducts, type: "sell-sheet" })}
-                  style={{
-                    padding: "8px 16px", borderRadius: 8,
-                    border: "1px solid rgba(196,151,59,0.25)", background: "rgba(196,151,59,0.08)",
-                    color: "#C4973B", fontSize: 11, fontWeight: 600, cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em",
-                  }}
-                >Export Sell Sheet</button>
-                <button
-                  onClick={() => exportPDF({ products: PRODUCT_KB, type: "line-sheet" })}
-                  style={{
-                    padding: "8px 16px", borderRadius: 8,
-                    border: "1px solid rgba(196,151,59,0.25)", background: "rgba(196,151,59,0.08)",
-                    color: "#C4973B", fontSize: 11, fontWeight: 600, cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em",
-                  }}
-                >Export Line Sheet</button>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
+                {["all", "hero", "face", "cheeks", "lips", "multi-use"].map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setProductFilter(f)}
+                    style={{
+                      padding: "6px 14px", borderRadius: 20,
+                      border: productFilter === f ? "1px solid #C4973B" : "1px solid rgba(196,151,59,0.15)",
+                      background: productFilter === f ? "rgba(196,151,59,0.15)" : "transparent",
+                      color: productFilter === f ? "#C4973B" : "rgba(232,224,212,0.5)",
+                      fontSize: 11, cursor: "pointer", textTransform: "capitalize",
+                      fontFamily: "'DM Sans', sans-serif", fontWeight: 600, letterSpacing: "0.04em",
+                    }}
+                  >
+                    {f}
+                  </button>
+                ))}
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
                 {filteredProducts.map((p, i) => (
@@ -524,7 +544,7 @@ export default function App() {
                   }}
                 >
                   <option value="high">High</option>
-                  <option value="medium">Med</option>
+                  <option value="medium">Medium</option>
                   <option value="low">Low</option>
                 </select>
                 <button

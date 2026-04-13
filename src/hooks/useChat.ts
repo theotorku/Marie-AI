@@ -1,4 +1,4 @@
-import { useReducer, useEffect } from "react";
+import { useReducer, useEffect, useRef, useCallback } from "react";
 import { CONFIG, SYSTEM_PROMPT } from "../config";
 import type { ChatMessage, ChatState, ChatAction } from "../types";
 
@@ -36,6 +36,7 @@ function authHeaders(token: string | null): Record<string, string> {
 
 export function useChat(token: string | null) {
   const [state, dispatch] = useReducer(chatReducer, initialState);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Load chat history from Supabase on mount
   useEffect(() => {
@@ -59,6 +60,14 @@ export function useChat(token: string | null) {
     }).catch(() => {});
   };
 
+  const stopGeneration = useCallback(() => {
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
+    dispatch({ type: "SET_LOADING", payload: false });
+  }, []);
+
   const sendMessage = async (text: string): Promise<void> => {
     const trimmed = text.trim();
     if (!trimmed || state.loading) return;
@@ -73,10 +82,14 @@ export function useChat(token: string | null) {
     persistMessage(userMsg);
     dispatch({ type: "SET_LOADING", payload: true });
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     try {
       const response = await fetch(CONFIG.apiUrl, {
         method: "POST",
         headers: authHeaders(token),
+        signal: controller.signal,
         body: JSON.stringify({
           model: CONFIG.model,
           max_tokens: CONFIG.maxTokens,
@@ -101,18 +114,23 @@ export function useChat(token: string | null) {
       dispatch({ type: "ADD_MESSAGE", payload: assistantMsg });
       persistMessage(assistantMsg);
     } catch (err) {
-      const message =
-        err instanceof Error && err.message
-          ? err.message
-          : "I'm having trouble connecting right now. Please try again in a moment.";
-      dispatch({
-        type: "ADD_MESSAGE",
-        payload: { role: "assistant", content: message },
-      });
+      if (err instanceof DOMException && err.name === "AbortError") {
+        // User stopped generation — no error message needed
+      } else {
+        const message =
+          err instanceof Error && err.message
+            ? err.message
+            : "I'm having trouble connecting right now. Please try again in a moment.";
+        dispatch({
+          type: "ADD_MESSAGE",
+          payload: { role: "assistant", content: message },
+        });
+      }
     }
 
+    abortRef.current = null;
     dispatch({ type: "SET_LOADING", payload: false });
   };
 
-  return { ...state, sendMessage };
+  return { ...state, sendMessage, stopGeneration };
 }
