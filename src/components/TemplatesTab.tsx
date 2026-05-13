@@ -8,6 +8,8 @@ interface TemplatesTabProps {
   onUse: (template: EmailTemplate) => void;
   isPro: boolean;
   onUpgrade: () => void;
+  onNavigate?: (tab: string) => void;
+  onStartSetup?: () => void;
 }
 
 const CATEGORIES = [
@@ -19,7 +21,37 @@ const CATEGORIES = [
   { value: "general", label: "General" },
 ];
 
-export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro, onUpgrade }: TemplatesTabProps) {
+const STARTER_TEMPLATES = [
+  {
+    name: "Buyer Introduction",
+    category: "buyer_outreach",
+    subject: "Introducing our beauty line",
+    body: "Hi [Name],\n\nI wanted to introduce our beauty line and share a few hero products that may be a fit for [Retailer]. Our positioning centers on artistry, inclusive shade performance, and products that are easy for teams to explain on the floor.\n\nI would be happy to send a concise line sheet and samples for your review.\n\nWarmly,\n[Your Name]",
+  },
+  {
+    name: "Post-Meeting Follow-Up",
+    category: "follow_up",
+    subject: "Thank you for your time",
+    body: "Hi [Name],\n\nThank you again for taking the time to meet today. I appreciated learning more about your priorities and where our products could support your assortment.\n\nAs discussed, I will send the line sheet, hero SKU details, and the next-step materials for your review.\n\nWarmly,\n[Your Name]",
+  },
+  {
+    name: "Sample Check-In",
+    category: "follow_up",
+    subject: "Checking in on samples",
+    body: "Hi [Name],\n\nI wanted to check in and see whether you had a chance to review the samples. I would love to hear what resonated, what questions came up, and whether there is anything else your team needs from me.\n\nHappy to make next steps easy.\n\nWarmly,\n[Your Name]",
+  },
+];
+
+export default function TemplatesTab({
+  templates,
+  onSave,
+  onDelete,
+  onUse,
+  isPro,
+  onUpgrade,
+  onNavigate,
+  onStartSetup,
+}: TemplatesTabProps) {
   const [filter, setFilter] = useState("all");
   const [showNew, setShowNew] = useState(false);
   const [newName, setNewName] = useState("");
@@ -27,31 +59,6 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
   const [newSubject, setNewSubject] = useState("");
   const [newBody, setNewBody] = useState("");
   const [expanded, setExpanded] = useState<number | null>(null);
-
-  if (!isPro) {
-    return (
-      <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center", padding: "60px 20px" }}>
-        <div style={{ fontSize: 36, marginBottom: 16 }}>{"\u2709"}</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 22, fontWeight: 600, marginBottom: 8 }}>
-          Email Templates
-        </h2>
-        <p style={{ fontSize: 13, color: "rgba(232,224,212,0.7)", marginBottom: 24 }}>
-          Save and reuse Marie-generated emails. Available on Professional plan.
-        </p>
-        <button
-          onClick={onUpgrade}
-          style={{
-            padding: "10px 24px", borderRadius: 10, border: "none",
-            background: "linear-gradient(135deg, #8B6914, #C4973B)",
-            color: "#1A1611", fontWeight: 700, fontSize: 13, cursor: "pointer",
-            fontFamily: "'DM Sans', sans-serif",
-          }}
-        >
-          Upgrade — $29/mo
-        </button>
-      </div>
-    );
-  }
 
   const filtered = filter === "all" ? templates : templates.filter((t) => t.category === filter);
 
@@ -65,6 +72,12 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
     setShowNew(false);
   };
 
+  const installStarterTemplates = async () => {
+    for (const template of STARTER_TEMPLATES) {
+      await onSave(template);
+    }
+  };
+
   return (
     <div style={{ maxWidth: 700, margin: "0 auto" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
@@ -72,7 +85,7 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
           Email Templates
         </h2>
         <button
-          onClick={() => setShowNew(!showNew)}
+          onClick={() => (isPro ? setShowNew(!showNew) : onUpgrade())}
           style={{
             padding: "8px 18px", borderRadius: 8, border: "none",
             background: "linear-gradient(135deg, #8B6914, #C4973B)",
@@ -80,12 +93,25 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
             fontFamily: "'DM Sans', sans-serif",
           }}
         >
-          {showNew ? "Cancel" : "+ New Template"}
+          {isPro ? (showNew ? "Cancel" : "+ New Template") : "Upgrade to Create"}
         </button>
       </div>
 
-      {/* New template form */}
-      {showNew && (
+      {!isPro && (
+        <div style={{
+          padding: "14px 16px", borderRadius: 12,
+          border: "1px solid rgba(196,151,59,0.16)",
+          background: "rgba(196,151,59,0.06)",
+          color: "rgba(232,224,212,0.75)",
+          fontSize: 12,
+          lineHeight: 1.5,
+          marginBottom: 18,
+        }}>
+          Read-only mode. You can view, copy, and use saved templates; creating or deleting templates requires Professional.
+        </div>
+      )}
+
+      {showNew && isPro && (
         <div style={{
           padding: 20, borderRadius: 14,
           border: "1px solid rgba(196,151,59,0.2)",
@@ -132,7 +158,7 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
           <textarea
             value={newBody}
             onChange={(e) => setNewBody(e.target.value)}
-            placeholder="Email body — paste a Marie-generated email or write your own..."
+            placeholder="Email body - paste a Marie-generated email or write your own..."
             rows={6}
             style={{
               width: "100%", padding: "12px 14px", borderRadius: 10,
@@ -156,7 +182,6 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
         </div>
       )}
 
-      {/* Category filter */}
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 20 }}>
         {CATEGORIES.map((c) => (
           <button
@@ -176,12 +201,58 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
         ))}
       </div>
 
-      {/* Template list */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "40px 20px", color: "rgba(232,224,212,0.6)", fontSize: 13 }}>
-          {templates.length === 0
-            ? "No templates yet. Save a Marie-generated email or create one from scratch."
-            : "No templates in this category."}
+        <div style={{ textAlign: "center", padding: "44px 20px", color: "rgba(232,224,212,0.68)", fontSize: 13 }}>
+          {templates.length === 0 ? (
+            <>
+              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 19, color: "#E8E0D4", fontWeight: 600, marginBottom: 8 }}>
+                Build your reusable outreach shelf
+              </div>
+              <div style={{ maxWidth: 430, margin: "0 auto 18px", lineHeight: 1.6 }}>
+                Start with buyer intro, post-meeting follow-up, and sample check-in templates so Marie has something useful to personalize.
+              </div>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+                {isPro && (
+                  <button
+                    onClick={installStarterTemplates}
+                    style={{
+                      padding: "10px 18px", borderRadius: 10, border: "none",
+                      background: "linear-gradient(135deg, #8B6914, #C4973B)",
+                      color: "#1A1611", fontWeight: 700, fontSize: 12, cursor: "pointer",
+                    }}
+                  >
+                    Add Starter Templates
+                  </button>
+                )}
+                <button
+                  onClick={isPro ? (onStartSetup || (() => setShowNew(true))) : onUpgrade}
+                  style={{
+                    padding: "10px 18px", borderRadius: 10,
+                    border: "1px solid rgba(196,151,59,0.25)",
+                    background: "rgba(255,255,255,0.04)",
+                    color: "#C4973B", fontWeight: 700, fontSize: 12, cursor: "pointer",
+                  }}
+                >
+                  {isPro ? "Create Custom Template" : "Upgrade to Create"}
+                </button>
+                {onNavigate && (
+                  <button
+                    onClick={() => onNavigate("studio")}
+                    style={{
+                      padding: "10px 18px", borderRadius: 10,
+                      border: "1px solid rgba(196,151,59,0.16)",
+                      background: "transparent",
+                      color: "rgba(232,224,212,0.75)", fontWeight: 700, fontSize: 12, cursor: "pointer",
+                    }}
+                  >
+                    Open Studio
+                  </button>
+                )}
+              </div>
+            </>
+          ) : (
+            "No templates in this category."
+          )}
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -195,7 +266,6 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
                 overflow: "hidden",
               }}
             >
-              {/* Header */}
               <div
                 onClick={() => setExpanded(expanded === t.id ? null : t.id)}
                 style={{
@@ -225,7 +295,6 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
                 </span>
               </div>
 
-              {/* Expanded body */}
               {expanded === t.id && (
                 <div style={{ padding: "0 20px 16px" }}>
                   <div style={{
@@ -237,7 +306,7 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
                   }}>
                     {t.body}
                   </div>
-                  <div style={{ display: "flex", gap: 8 }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button
                       onClick={() => onUse(t)}
                       style={{
@@ -250,9 +319,7 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
                       Use Template
                     </button>
                     <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(t.body);
-                      }}
+                      onClick={() => navigator.clipboard.writeText(t.body)}
                       style={{
                         padding: "8px 16px", borderRadius: 8,
                         border: "1px solid rgba(196,151,59,0.2)",
@@ -265,18 +332,24 @@ export default function TemplatesTab({ templates, onSave, onDelete, onUse, isPro
                       Copy
                     </button>
                     <button
-                      onClick={() => { if (confirm("Delete this template?")) onDelete(t.id); }}
+                      onClick={() => {
+                        if (!isPro) {
+                          onUpgrade();
+                          return;
+                        }
+                        if (confirm("Delete this template?")) onDelete(t.id);
+                      }}
                       style={{
                         padding: "8px 16px", borderRadius: 8,
                         border: "1px solid rgba(232,115,90,0.2)",
                         background: "transparent",
-                        color: "#E8735A",
+                        color: isPro ? "#E8735A" : "#C4973B",
                         fontSize: 11, cursor: "pointer",
                         fontFamily: "'DM Sans', sans-serif", fontWeight: 600,
                         marginLeft: "auto",
                       }}
                     >
-                      Delete
+                      {isPro ? "Delete" : "Upgrade to Delete"}
                     </button>
                   </div>
                 </div>
