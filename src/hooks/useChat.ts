@@ -51,15 +51,6 @@ export function useChat(token: string | null) {
       .catch(() => {});
   }, [token]);
 
-  const persistMessage = (msg: ChatMessage) => {
-    if (!token) return;
-    fetch("/api/messages", {
-      method: "POST",
-      headers: authHeaders(token),
-      body: JSON.stringify(msg),
-    }).catch(() => {});
-  };
-
   const stopGeneration = useCallback(() => {
     if (abortRef.current) {
       abortRef.current.abort();
@@ -79,7 +70,6 @@ export function useChat(token: string | null) {
 
     const userMsg: ChatMessage = { role: "user", content: trimmed };
     dispatch({ type: "ADD_MESSAGE", payload: userMsg });
-    persistMessage(userMsg);
     dispatch({ type: "SET_LOADING", payload: true });
 
     const controller = new AbortController();
@@ -112,7 +102,6 @@ export function useChat(token: string | null) {
         "I couldn't generate a response. Please try again.";
       const assistantMsg: ChatMessage = { role: "assistant", content: reply };
       dispatch({ type: "ADD_MESSAGE", payload: assistantMsg });
-      persistMessage(assistantMsg);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         // User stopped generation — no error message needed
