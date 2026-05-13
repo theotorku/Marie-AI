@@ -26,6 +26,7 @@ import CommandCenter, { getTimeGradient } from "./components/CommandCenter";
 import StudioTab from "./components/StudioTab";
 import MarieScore from "./components/MarieScore";
 import HandsFreeToggle from "./components/HandsFreeToggle";
+import DayOneSetup from "./components/DayOneSetup";
 import { useCRM } from "./hooks/useCRM";
 import { useSlack } from "./hooks/useSlack";
 import { useTemplates } from "./hooks/useTemplates";
@@ -406,6 +407,19 @@ export default function App() {
           {/* Home — Command Center */}
           {activeTab === "home" && (
             <div style={{ maxWidth: 800, margin: "0 auto", width: "100%" }}>
+              {(crm.contacts.length === 0 || taskStore.tasks.length === 0 || templateStore.templates.length === 0 || (marieScore.score ?? 0) === 0) && (
+                <DayOneSetup
+                  contactsCount={crm.contacts.length}
+                  openTasksCount={taskStore.tasks.filter((t) => !t.done).length}
+                  templatesCount={templateStore.templates.length}
+                  marieScore={marieScore.score}
+                  isPro={billing.tier === "professional"}
+                  onNavigate={setActiveTab}
+                  onStartContact={() => setActiveTab("contacts")}
+                  onStartTask={() => setActiveTab("tasks")}
+                  onStartTemplate={() => setActiveTab("templates")}
+                />
+              )}
               <CommandCenter
                 userName={auth.user.name}
                 notifications={notifs.notifications}
@@ -644,6 +658,7 @@ export default function App() {
               }}
               isPro={billing.tier === "professional"}
               onUpgrade={billing.upgrade}
+              onNavigate={setActiveTab}
             />
           )}
 
@@ -660,6 +675,20 @@ export default function App() {
           {activeTab === "tasks" && (
             <div style={{ maxWidth: 600, margin: "0 auto" }}>
               <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, fontWeight: 600, marginBottom: 24 }}>Daily Tasks</h2>
+              {taskStore.tasks.length === 0 && (
+                <DayOneSetup
+                  contactsCount={crm.contacts.length}
+                  openTasksCount={0}
+                  templatesCount={templateStore.templates.length}
+                  marieScore={marieScore.score}
+                  isPro={billing.tier === "professional"}
+                  onNavigate={setActiveTab}
+                  onStartContact={() => setActiveTab("contacts")}
+                  onStartTask={() => setNewTask("Follow up with one priority buyer")}
+                  onStartTemplate={() => setActiveTab("templates")}
+                  compact
+                />
+              )}
               <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
                 <input
                   value={newTask}
@@ -703,9 +732,15 @@ export default function App() {
               <div style={{ marginBottom: 12, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(232,224,212,0.65)", fontWeight: 600 }}>
                 {taskStore.tasks.filter((t) => !t.done).length} remaining · {taskStore.tasks.filter((t) => t.done).length} complete
               </div>
-              {sortedTasks.map((task) => (
-                <TaskItem key={task.id} task={task} onToggle={() => taskStore.toggleTask(task.id)} onDelete={() => taskStore.deleteTask(task.id)} />
-              ))}
+              {sortedTasks.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "36px 20px", color: "rgba(232,224,212,0.68)", fontSize: 13, lineHeight: 1.6 }}>
+                  Add one concrete next action, then mark it complete when done. Marie Score starts moving once your day has real activity.
+                </div>
+              ) : (
+                sortedTasks.map((task) => (
+                  <TaskItem key={task.id} task={task} onToggle={() => taskStore.toggleTask(task.id)} onDelete={() => taskStore.deleteTask(task.id)} />
+                ))
+              )}
             </div>
           )}
 

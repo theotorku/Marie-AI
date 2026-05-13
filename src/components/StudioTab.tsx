@@ -89,6 +89,24 @@ const TOOLS: ToolCard[] = [
   },
 ];
 
+const STARTER_BRIEFS = [
+  {
+    label: "Retail follow-up",
+    tool: "thankyou",
+    text: "Write a warm follow-up after a buyer meeting. We discussed hero SKUs, clean artistry positioning, and a next step of sending a line sheet this week.",
+  },
+  {
+    label: "Launch caption",
+    tool: "social",
+    text: "Create launch captions for a complexion product that blurs texture, works across skin tones, and feels editorial but wearable.",
+  },
+  {
+    label: "Buyer pitch",
+    tool: "pitch",
+    text: "Build a concise buyer call script for pitching three hero products to a specialty beauty retailer. Include likely objections around shelf space and differentiation.",
+  },
+];
+
 function PulsingDots() {
   return (
     <span style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>
@@ -161,6 +179,13 @@ export default function StudioTab({ token, isPro, onUpgrade, onSendToChat, onSav
 
   const selectedTool = TOOLS.find((t) => t.id === selected);
 
+  const applyStarterBrief = (brief: (typeof STARTER_BRIEFS)[number]) => {
+    setSelected(brief.tool);
+    setContext(brief.text);
+    setResult("");
+    setCopied(false);
+  };
+
   const handleGenerate = async () => {
     if (!selectedTool || !token) return;
     setGenerating(true);
@@ -190,7 +215,9 @@ export default function StudioTab({ token, isPro, onUpgrade, onSendToChat, onSav
       const data = await res.json();
       const text =
         data.reply ||
-        data.content ||
+        (Array.isArray(data.content)
+          ? data.content.map((block: { text?: string }) => block.text || "").join("\n").trim()
+          : data.content) ||
         (data.choices && data.choices[0]?.message?.content) ||
         "";
       setResult(text);
@@ -259,8 +286,40 @@ export default function StudioTab({ token, isPro, onUpgrade, onSendToChat, onSav
             fontFamily: "'DM Sans', sans-serif",
           }}
         >
-          Brand-aware creative tools
+          Brand-aware creative tools with reusable outputs for chat and templates.
         </p>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+          gap: 10,
+          marginBottom: 22,
+        }}
+      >
+        {STARTER_BRIEFS.map((brief) => (
+          <button
+            key={brief.label}
+            onClick={() => applyStarterBrief(brief)}
+            style={{
+              minHeight: 76,
+              padding: "12px 14px",
+              borderRadius: 12,
+              border: "1px solid rgba(196,151,59,0.14)",
+              background: "rgba(0,0,0,0.18)",
+              color: "#E8E0D4",
+              textAlign: "left",
+              cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif",
+            }}
+          >
+            <div style={{ fontSize: 11, color: "#C4973B", fontWeight: 700, marginBottom: 6 }}>
+              STARTER BRIEF
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 700 }}>{brief.label}</div>
+          </button>
+        ))}
       </div>
 
       {/* Tool Cards Grid */}
