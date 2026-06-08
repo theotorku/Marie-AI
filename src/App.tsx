@@ -194,6 +194,9 @@ export default function App() {
         @keyframes subtleFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
         @keyframes glowPulse { 0%, 100% { box-shadow: 0 0 0 rgba(196,151,59,0); } 50% { box-shadow: 0 0 20px rgba(196,151,59,0.08); } }
         @keyframes soundWave { 0%, 100% { height: 4px; } 50% { height: 14px; } }
+        @keyframes marieLogoFloat { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.02); } }
+        @keyframes marieLogoHalo { 0%, 100% { opacity: 0.35; transform: scale(0.92); } 50% { opacity: 0.85; transform: scale(1.08); } }
+        @keyframes marieLogoSheen { 0% { transform: translateX(-130%) rotate(24deg); } 48%, 100% { transform: translateX(130%) rotate(24deg); } }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -242,6 +245,50 @@ export default function App() {
         /* Sidebar nav hover micro-animation */
         .nav-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important; }
         .nav-btn:hover { background: rgba(196,151,59,0.1) !important; transform: scale(1.05); }
+
+        .marie-logo-shell {
+          position: relative;
+          width: 46px;
+          height: 46px;
+          display: grid;
+          place-items: center;
+          isolation: isolate;
+          border-radius: 14px;
+          overflow: hidden;
+          animation: marieLogoFloat 4.8s ease-in-out infinite;
+        }
+        .marie-logo-shell::before {
+          content: "";
+          position: absolute;
+          inset: 3px;
+          z-index: -1;
+          border-radius: inherit;
+          background: radial-gradient(circle, rgba(212,168,75,0.28), rgba(196,151,59,0.08) 52%, transparent 72%);
+          animation: marieLogoHalo 3.6s ease-in-out infinite;
+        }
+        .marie-logo-shell::after {
+          content: "";
+          position: absolute;
+          top: -18%;
+          bottom: -18%;
+          width: 18px;
+          background: linear-gradient(90deg, transparent, rgba(255,247,234,0.34), transparent);
+          animation: marieLogoSheen 6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+        }
+        .marie-logo-mark {
+          width: 40px;
+          height: 40px;
+          object-fit: contain;
+          border-radius: 10px;
+          filter: drop-shadow(0 0 12px rgba(196,151,59,0.16));
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .marie-logo-shell,
+          .marie-logo-shell::before,
+          .marie-logo-shell::after {
+            animation: none;
+          }
+        }
 
         /* Section accent tints on hover */
         .accent-emails:hover { border-color: rgba(232,160,191,0.3) !important; }
@@ -293,11 +340,11 @@ export default function App() {
           flexShrink: 0,
         }}
       >
-        <div style={{ marginBottom: 20 }}>
+        <div className="marie-logo-shell" style={{ marginBottom: 20 }}>
           <img
             src="/Marie%20AI%202.png"
             alt="Marie AI"
-            style={{ width: 40, height: 40, objectFit: "contain", borderRadius: 10 }}
+            className="marie-logo-mark"
           />
         </div>
         {TABS.map((tab) => (
