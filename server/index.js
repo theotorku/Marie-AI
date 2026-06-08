@@ -96,23 +96,28 @@ app.use(express.json());
 
 // ── Waitlist (public, no auth) ──────────────────────────────────────────────
 
-app.post("/api/waitlist", async (req, res) => {
-  const { email } = req.body;
-  if (!email || !email.includes("@")) {
-    return res.status(400).json({ error: "Valid email required." });
+app.post(
+  "/api/waitlist",
+  rateLimit({ windowMs: 60_000, maxRequests: 5 }),
+  async (req, res) => {
+    const { email } = req.body;
+    if (!email || !email.includes("@")) {
+      return res.status(400).json({ error: "Valid email required." });
+    }
+    try {
+      const db = getDb();
+      const { error } = await db.from("waitlist").upsert(
+        { email: email.toLowerCase().trim(), created_at: new Date().toISOString() },
+        { onConflict: "email" }
+      );
+      if (error) throw error;
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Waitlist error:", err.message);
+      res.status(500).json({ error: "Something went wrong. Please try again." });
+    }
   }
-  try {
-    const db = getDb();
-    await db.from("waitlist").upsert(
-      { email: email.toLowerCase().trim(), created_at: new Date().toISOString() },
-      { onConflict: "email" }
-    );
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Waitlist error:", err.message);
-    res.status(500).json({ error: "Something went wrong. Please try again." });
-  }
-});
+);
 
 // ── Feature gate middleware ───────────────────────────────────────────────────
 
