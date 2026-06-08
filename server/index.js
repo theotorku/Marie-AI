@@ -44,6 +44,22 @@ import {
 
 const PORT = process.env.PORT || 3001;
 
+// Fire-and-forget Slack ping for new waitlist signups. No-op unless
+// WAITLIST_SLACK_WEBHOOK is set; never blocks or fails the signup response.
+async function notifyWaitlistSignup(email) {
+  const url = process.env.WAITLIST_SLACK_WEBHOOK;
+  if (!url) return;
+  try {
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: `🎉 New Marie AI waitlist signup: ${email}` }),
+    });
+  } catch (err) {
+    console.error("Waitlist Slack notify failed:", err.message);
+  }
+}
+
 export function createApp() {
   const app = express();
   const chatRateLimiters = Object.fromEntries(
@@ -106,12 +122,18 @@ app.post(
     }
     try {
       const db = getDb();
-      const { error } = await db.from("waitlist").upsert(
-        { email: email.toLowerCase().trim(), created_at: new Date().toISOString() },
-        { onConflict: "email" }
-      );
+      const cleanEmail = email.toLowerCase().trim();
+      const { data, error } = await db
+        .from("waitlist")
+        .upsert(
+          { email: cleanEmail, created_at: new Date().toISOString() },
+          { onConflict: "email", ignoreDuplicates: true }
+        )
+        .select();
       if (error) throw error;
       res.json({ success: true });
+      // Notify only on genuinely new signups (dupes are skipped above)
+      if (data && data.length) notifyWaitlistSignup(cleanEmail);
     } catch (err) {
       console.error("Waitlist error:", err.message);
       res.status(500).json({ error: "Something went wrong. Please try again." });
