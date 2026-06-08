@@ -103,7 +103,7 @@ export async function handleSlashCommand(payload) {
     return {
       response_type: "ephemeral",
       text: "Your Slack account isn't linked to Marie AI yet. Log in at " +
-        (process.env.APP_URL || "https://jmarie.beauty") +
+        (process.env.APP_URL || "https://jmarie.beauty") + "/app" +
         " and connect Slack from your settings.",
     };
   }
@@ -115,7 +115,7 @@ export async function handleSlashCommand(payload) {
     return {
       response_type: "ephemeral",
       text: "Slack integration requires a Professional plan. Upgrade at " +
-        (process.env.APP_URL || "https://jmarie.beauty"),
+        (process.env.APP_URL || "https://jmarie.beauty") + "/app",
     };
   }
 
@@ -164,7 +164,7 @@ export async function handleSlackEvent(body) {
     if (!config.slack) {
       await postSlackMessage(conn.bot_token, channel,
         "Slack integration requires a Professional plan. Upgrade at " +
-        (process.env.APP_URL || "https://jmarie.beauty"));
+        (process.env.APP_URL || "https://jmarie.beauty") + "/app");
       return { ok: true };
     }
 

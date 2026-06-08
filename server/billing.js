@@ -111,8 +111,8 @@ export async function createCheckoutSession(userId, userEmail) {
     customer: customerId,
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${process.env.APP_URL || "http://localhost:5173"}?upgraded=true`,
-    cancel_url: `${process.env.APP_URL || "http://localhost:5173"}?cancelled=true`,
+    success_url: `${process.env.APP_URL || "http://localhost:5173"}/app?upgraded=true`,
+    cancel_url: `${process.env.APP_URL || "http://localhost:5173"}/app?cancelled=true`,
     metadata: { userId },
   });
 
@@ -133,7 +133,7 @@ export async function createPortalSession(userId) {
 
   const session = await s.billingPortal.sessions.create({
     customer: user.stripe_customer_id,
-    return_url: process.env.APP_URL || "http://localhost:5173",
+    return_url: `${process.env.APP_URL || "http://localhost:5173"}/app`,
   });
 
   return session.url;

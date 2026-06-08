@@ -276,9 +276,21 @@ registerAgentRoutes(app, {
 // ── Static files (production) ─────────────────────────────────────────────────
 
 const distPath = join(__dirname, "../dist");
-app.use(express.static(distPath));
-app.get("/{*splat}", (req, res) => {
+app.use(express.static(distPath, { index: false }));
+
+// Marketing landing page at the root
+app.get("/", (req, res) => {
+  res.sendFile(join(distPath, "landing.html"));
+});
+
+// React app (single-page, state-based) served under /app and its sub-paths
+app.get("/app{/*splat}", (req, res) => {
   res.sendFile(join(distPath, "index.html"));
+});
+
+// Any other unmatched route falls back to the landing page
+app.get("/{*splat}", (req, res) => {
+  res.redirect("/");
 });
 
 return app;
