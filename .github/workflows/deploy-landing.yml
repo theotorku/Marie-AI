@@ -30,10 +30,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Stage site
-        # landing.html is self-contained; publish it as the site index
+        # Publish the static marketing site (public/) with landing.html as the
+        # index. Ship privacy/terms + brand images so footer links and assets
+        # resolve. Rewrite absolute legal links to relative so they work under
+        # the project Pages subpath (e.g. /Marie-AI/).
         run: |
           mkdir -p _site
+          cp -r public/. _site/
           cp public/landing.html _site/index.html
+          sed -i 's#href="/privacy.html"#href="privacy.html"#g; s#href="/terms.html"#href="terms.html"#g' _site/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
