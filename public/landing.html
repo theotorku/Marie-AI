@@ -73,24 +73,13 @@ img{display:block;max-width:100%}
 .btn-secondary:hover{border-color:var(--gold-2);background:rgba(196,151,59,.08)}
 .hero{min-height:92svh;position:relative;display:grid;align-items:end;padding:120px clamp(20px,4vw,56px) 72px;isolation:isolate;overflow:hidden}
 .hero::before{content:"";position:absolute;inset:-2.5%;z-index:-2;background:
-  linear-gradient(90deg,rgba(13,11,9,.98) 0%,rgba(13,11,9,.86) 48%,rgba(13,11,9,.38) 78%,rgba(13,11,9,.74) 100%),
-  url("Marie%20AI.png") center right 8%/min(820px,72vw) auto no-repeat,
-  linear-gradient(135deg,#0D0B09 0%,#1C1510 52%,#070605 100%);transform-origin:78% 46%;animation:hero-drift 24s var(--ease) infinite}
+  radial-gradient(120% 90% at 82% 30%,rgba(28,21,16,.9) 0%,rgba(13,11,9,0) 55%),
+  linear-gradient(135deg,#0D0B09 0%,#1C1510 54%,#070605 100%);transform-origin:78% 46%;animation:hero-drift 24s var(--ease) infinite}
 .hero::after{content:"";position:absolute;inset:0;z-index:-1;background:
   radial-gradient(circle at 74% 34%,rgba(217,180,100,.2),transparent 28%),
   radial-gradient(circle at 88% 68%,rgba(135,147,109,.14),transparent 26%),
   linear-gradient(105deg,transparent 0%,rgba(255,247,234,.055) 43%,transparent 58%),
   linear-gradient(0deg,var(--ink) 0%,rgba(13,11,9,0) 32%);background-size:120% 120%,120% 120%,180% 100%,100% 100%;background-position:70% 34%,88% 68%,-90% 0,0 0;animation:hero-light 18s ease-in-out infinite;pointer-events:none}
-.hyperframe-bg{position:absolute;inset:76px clamp(20px,4vw,56px) 36px;z-index:-1;pointer-events:none;opacity:.72;mix-blend-mode:screen}
-.hf-line{position:absolute;background:linear-gradient(90deg,transparent,rgba(217,180,100,.44),transparent);transform-origin:center;filter:drop-shadow(0 0 12px rgba(196,151,59,.2))}
-.hf-line.h{right:2%;width:min(560px,42vw);height:1px;animation:hf-scan-x 8.5s ease-in-out infinite}
-.hf-line.h.one{top:26%;animation-delay:-1.4s}
-.hf-line.h.two{bottom:22%;width:min(420px,34vw);animation-delay:-4.6s}
-.hf-line.v{right:18%;top:14%;width:1px;height:min(460px,52vh);background:linear-gradient(180deg,transparent,rgba(217,180,100,.38),transparent);animation:hf-scan-y 10s ease-in-out infinite}
-.hf-node{position:absolute;width:7px;height:7px;border:1px solid rgba(217,180,100,.7);border-radius:50%;box-shadow:0 0 18px rgba(217,180,100,.32);animation:hf-node 5.6s ease-in-out infinite}
-.hf-node.a{right:17.8%;top:26%;animation-delay:-.6s}
-.hf-node.b{right:10%;bottom:22%;animation-delay:-2.7s}
-.hf-frame{position:absolute;right:6%;top:18%;width:min(520px,38vw);height:min(420px,48vh);border:1px solid rgba(232,224,212,.08);border-left-color:rgba(217,180,100,.18);border-bottom-color:rgba(217,180,100,.16);clip-path:polygon(0 0,100% 0,100% 72%,82% 100%,0 100%);animation:hf-breathe 12s ease-in-out infinite}
 .hero-grid{display:block;width:100%}
 .kicker{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.22em;color:var(--gold-2);margin-bottom:18px}
 h1{font-family:var(--display);font-size:clamp(4rem,9vw,8.3rem);line-height:.88;font-weight:700;letter-spacing:0;max-width:700px}
@@ -197,14 +186,10 @@ main{position:relative;z-index:1}
 @keyframes logo-sheen{0%{transform:translateX(-130%) rotate(24deg)}48%,100%{transform:translateX(130%) rotate(24deg)}}
 @keyframes hero-drift{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-1.2%,.8%,0) scale(1.035)}}
 @keyframes hero-light{0%,100%{opacity:.72;background-position:70% 34%,88% 68%,-90% 0,0 0}45%{opacity:1;background-position:68% 30%,84% 64%,120% 0,0 0}70%{opacity:.82;background-position:76% 38%,90% 70%,120% 0,0 0}}
-@keyframes hf-scan-x{0%,100%{opacity:.24;transform:translate3d(0,0,0) scaleX(.68)}44%{opacity:.78;transform:translate3d(-8%,0,0) scaleX(1)}72%{opacity:.34;transform:translate3d(5%,0,0) scaleX(.82)}}
-@keyframes hf-scan-y{0%,100%{opacity:.18;transform:translate3d(0,0,0) scaleY(.72)}50%{opacity:.68;transform:translate3d(0,5%,0) scaleY(1)}}
-@keyframes hf-node{0%,100%{opacity:.28;transform:scale(.72)}45%{opacity:1;transform:scale(1.18)}}
-@keyframes hf-breathe{0%,100%{opacity:.34;transform:translate3d(0,0,0) scale(.98)}50%{opacity:.72;transform:translate3d(-1.5%,1%,0) scale(1.01)}}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   .reveal,.btn,.nav,.faq-answer{transition:none}
-  .hero::before,.hero::after,.brand-mark-wrap,.brand-mark-wrap::before,.brand-mark-wrap::after,.hyperframe-bg *{animation:none}
+  .hero::before,.hero::after,.brand-mark-wrap,.brand-mark-wrap::before,.brand-mark-wrap::after{animation:none}
 }
 @media(max-width:980px){
   .section-head,.workflow,.scene-inner{grid-template-columns:1fr}
@@ -220,14 +205,8 @@ main{position:relative;z-index:1}
   .menu-btn{display:flex;position:relative}
   .hero{padding-top:104px;min-height:auto}
   .hero::before{background:
-    linear-gradient(180deg,rgba(13,11,9,.78) 0%,rgba(13,11,9,.86) 55%,rgba(13,11,9,1) 100%),
-    url("Marie%20AI.png") top 64px center/118vw auto no-repeat,
+    radial-gradient(140% 70% at 70% 12%,rgba(28,21,16,.85) 0%,rgba(13,11,9,0) 60%),
     linear-gradient(135deg,#0D0B09 0%,#1C1510 100%)}
-  .hyperframe-bg{inset:68px 16px 24px;opacity:.45}
-  .hf-frame{right:0;top:8%;width:68vw;height:28vh}
-  .hf-line.h{right:0;width:58vw}
-  .hf-line.v{right:24%;height:32vh}
-  .hero-content{padding-top:42svh}
   h1{font-size:clamp(4.1rem,20vw,6.2rem)}
   .section{padding-left:20px;padding-right:20px}
   .pipeline{grid-template-columns:1fr 1fr}
@@ -269,19 +248,11 @@ main{position:relative;z-index:1}
 </div>
 
 <header class="hero" id="top">
-  <div class="hyperframe-bg" aria-hidden="true">
-    <span class="hf-frame"></span>
-    <span class="hf-line h one"></span>
-    <span class="hf-line h two"></span>
-    <span class="hf-line v"></span>
-    <span class="hf-node a"></span>
-    <span class="hf-node b"></span>
-  </div>
   <div class="hero-grid">
     <div class="hero-content reveal">
       <p class="kicker">For beauty founders, reps, and retail teams</p>
       <h1>Know who needs you next.</h1>
-      <p class="hero-copy">Marie AI turns scattered buyer emails, meetings, tasks, and product notes into one daily operating rhythm.</p>
+      <p class="hero-copy">Marie AI keeps your buyer emails, meetings, tasks, and product notes in one place, then tells you who needs a reply first.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#signup">Request access</a>
         <a class="btn btn-secondary" href="#command">See the workflow</a>
@@ -312,7 +283,7 @@ main{position:relative;z-index:1}
         <p class="eyebrow reveal">Command center</p>
         <div>
           <h2 class="section-title reveal">A working surface for the retail side of beauty.</h2>
-          <p class="section-copy reveal">Marie is built around the things that make or break wholesale momentum: buyer context, timely follow-up, clean product copy, and a pipeline that never goes quiet without being noticed.</p>
+          <p class="section-copy reveal">Marie keeps four things in view: who you're talking to, who's gone quiet, the product copy you need, and where every deal stands.</p>
         </div>
       </div>
       <div class="workflow">
@@ -378,14 +349,14 @@ main{position:relative;z-index:1}
       <div class="section-head">
         <p class="eyebrow reveal">What it handles</p>
         <div>
-          <h2 class="section-title reveal">Less dashboard theater. More actual follow-through.</h2>
-          <p class="section-copy reveal">Every feature earns its place by helping you answer one question: what should happen next?</p>
+          <h2 class="section-title reveal">Tools you'll actually open.</h2>
+          <p class="section-copy reveal">Every feature is here to answer one question: what should happen next?</p>
         </div>
       </div>
       <div class="feature-lines">
         <div class="feature-line reveal">
           <h3>Daily briefing</h3>
-          <p>Calendar, unread email, open tasks, buyer pipeline, and stale contacts compressed into a plain-language morning brief.</p>
+          <p>Calendar, unread email, open tasks, pipeline, and stale contacts in a short morning brief you can read in under a minute.</p>
           <span>Pro</span>
         </div>
         <div class="feature-line reveal">
@@ -400,7 +371,7 @@ main{position:relative;z-index:1}
         </div>
         <div class="feature-line reveal">
           <h3>Marie Score</h3>
-          <p>A single health metric across pipeline, follow-ups, outreach, and task completion so the week has a pulse.</p>
+          <p>One health score across pipeline, follow-ups, outreach, and task completion, so you can see where the week stands at a glance.</p>
           <span>Free</span>
         </div>
         <div class="feature-line reveal">
@@ -416,8 +387,8 @@ main{position:relative;z-index:1}
     <div class="scene-inner">
       <h2 class="quote reveal">Built for the in-between work that keeps buyers warm.</h2>
       <div class="quote-panel reveal">
-        <h2>No fake magic. Just a cleaner operating cadence.</h2>
-        <p>Connect the tools you already use, keep your product and buyer context in one place, and let Marie turn scattered information into the next useful action.</p>
+        <h2>No gimmicks. Just less time chasing your own pipeline.</h2>
+        <p>Connect the tools you already use, keep your product and buyer notes in one place, and let Marie point you to the next thing worth doing.</p>
       </div>
     </div>
   </section>
