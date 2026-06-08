@@ -142,3 +142,21 @@ create table if not exists email_templates (
 );
 
 create index if not exists idx_email_templates_user on email_templates(user_id, category);
+
+-- ── Row Level Security ───────────────────────────────────────────────────────
+-- All data is accessed exclusively through the server using the service-role
+-- key, which bypasses RLS. Enabling RLS with no policies denies all direct
+-- anon/authenticated access via the public Data API, keeping these tables
+-- (especially google_tokens) private. Add policies only if you ever introduce
+-- direct client-side Supabase access.
+alter table waitlist          enable row level security;
+alter table users             enable row level security;
+alter table messages          enable row level security;
+alter table tasks             enable row level security;
+alter table google_tokens     enable row level security;
+alter table notifications     enable row level security;
+alter table slack_connections enable row level security;
+alter table agent_runs        enable row level security;
+alter table contacts          enable row level security;
+alter table interactions      enable row level security;
+alter table email_templates   enable row level security;
