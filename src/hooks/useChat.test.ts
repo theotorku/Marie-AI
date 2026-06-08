@@ -93,7 +93,7 @@ describe("useChat", () => {
     expect(result.current.messages[2].content).toBe("Hi there!");
   });
 
-  it("persists messages to Supabase via API", async () => {
+  it("sends chat requests without separately persisting messages", async () => {
     const spy = mockFetch({
       ok: true,
       json: async () => ({ content: [{ text: "Saved reply" }] }),
@@ -104,11 +104,11 @@ describe("useChat", () => {
       await result.current.sendMessage("Save this");
     });
 
-    // Verify POST /api/messages was called (for user + assistant messages)
     const persistCalls = spy.mock.calls.filter(
       ([url, opts]) => typeof url === "string" && url.endsWith("/api/messages") && opts?.method === "POST"
     );
-    expect(persistCalls.length).toBe(2); // user msg + assistant msg
+    expect(persistCalls.length).toBe(0);
+    expect(spy).toHaveBeenCalledWith("/api/chat", expect.objectContaining({ method: "POST" }));
   });
 
   it("rejects messages over the character limit", async () => {

@@ -54,16 +54,63 @@ export default function AuthScreen({ onLogin, onRegister }: AuthScreenProps) {
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         input::placeholder { color: rgba(232,224,212,0.6); }
+        @keyframes authLogoFloat { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-3px) scale(1.01); } }
+        @keyframes authLogoHalo { 0%, 100% { opacity: 0.34; transform: scale(0.94); } 50% { opacity: 0.86; transform: scale(1.08); } }
+        @keyframes authLogoSheen { 0% { transform: translateX(-130%) rotate(22deg); } 46%, 100% { transform: translateX(130%) rotate(22deg); } }
+        .auth-logo-shell {
+          position: relative;
+          display: inline-grid;
+          place-items: center;
+          min-width: 190px;
+          min-height: 82px;
+          isolation: isolate;
+          overflow: hidden;
+          border-radius: 18px;
+          animation: authLogoFloat 5s ease-in-out infinite;
+        }
+        .auth-logo-shell::before {
+          content: "";
+          position: absolute;
+          inset: 8px 18px;
+          z-index: -1;
+          border-radius: inherit;
+          background: radial-gradient(circle, rgba(212,168,75,0.22), rgba(196,151,59,0.08) 54%, transparent 74%);
+          animation: authLogoHalo 3.8s ease-in-out infinite;
+        }
+        .auth-logo-shell::after {
+          content: "";
+          position: absolute;
+          top: -20%;
+          bottom: -20%;
+          width: 26px;
+          background: linear-gradient(90deg, transparent, rgba(255,247,234,0.3), transparent);
+          animation: authLogoSheen 6.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+        }
+        .auth-logo {
+          height: 56px;
+          width: auto;
+          object-fit: contain;
+          filter: drop-shadow(0 0 18px rgba(196,151,59,0.18));
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .auth-logo-shell,
+          .auth-logo-shell::before,
+          .auth-logo-shell::after {
+            animation: none;
+          }
+        }
       `}</style>
 
       <div style={{ width: 400, padding: 40 }}>
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <img
-            src="/Marie%20AI.png"
-            alt="Marie AI"
-            style={{ height: 56, width: "auto", objectFit: "contain", marginBottom: 20 }}
-          />
+          <div className="auth-logo-shell" style={{ marginBottom: 20 }}>
+            <img
+              src="/Marie%20AI.png"
+              alt="Marie AI"
+              className="auth-logo"
+            />
+          </div>
           <div style={{ fontSize: 13, color: "rgba(232,224,212,0.7)" }}>
             {mode === "login" ? "Welcome back" : "Create your account"}
           </div>

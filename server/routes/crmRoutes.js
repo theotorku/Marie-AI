@@ -8,7 +8,9 @@ import {
 } from "./routeHelpers.js";
 
 export function registerCrmRoutes(app, { authenticateToken, requireTier, getDb }) {
-  app.get("/api/contacts", authenticateToken, requireTier("proactiveAgent"), async (req, res) => {
+  const crmWriteMiddleware = [authenticateToken, requireTier("proactiveAgent")];
+
+  app.get("/api/contacts", authenticateToken, async (req, res) => {
     const db = getDb();
     const result = await scopeToUser(
       db
@@ -19,7 +21,7 @@ export function registerCrmRoutes(app, { authenticateToken, requireTier, getDb }
     return sendListResponse(res, result, "contacts");
   });
 
-  app.post("/api/contacts", authenticateToken, requireTier("proactiveAgent"), async (req, res) => {
+  app.post("/api/contacts", ...crmWriteMiddleware, async (req, res) => {
     const { name, company, role, email, phone, stage, notes } = req.body;
     if (!name) return res.status(400).json({ error: "name is required." });
     const db = getDb();
@@ -31,7 +33,7 @@ export function registerCrmRoutes(app, { authenticateToken, requireTier, getDb }
     return sendRecordResponse(res, result, "contact", { status: 201 });
   });
 
-  app.patch("/api/contacts/:id", authenticateToken, async (req, res) => {
+  app.patch("/api/contacts/:id", ...crmWriteMiddleware, async (req, res) => {
     const db = getDb();
     const result = await scopeToOwnedRecord(
       db
@@ -45,7 +47,7 @@ export function registerCrmRoutes(app, { authenticateToken, requireTier, getDb }
     return sendRecordResponse(res, result, "contact", { notFoundMessage: "Contact not found." });
   });
 
-  app.delete("/api/contacts/:id", authenticateToken, async (req, res) => {
+  app.delete("/api/contacts/:id", ...crmWriteMiddleware, async (req, res) => {
     const db = getDb();
     const { error } = await scopeToOwnedRecord(
       db
@@ -71,10 +73,21 @@ export function registerCrmRoutes(app, { authenticateToken, requireTier, getDb }
     return sendListResponse(res, result, "interactions");
   });
 
-  app.post("/api/contacts/:id/interactions", authenticateToken, async (req, res) => {
+  app.post("/api/contacts/:id/interactions", ...crmWriteMiddleware, async (req, res) => {
     const { type, summary } = req.body;
     if (!type || !summary) return res.status(400).json({ error: "type and summary are required." });
     const db = getDb();
+
+    const { data: contact, error: contactError } = await scopeToOwnedRecord(
+      db
+      .from("contacts")
+      .select("id"),
+      req.params.id,
+      req.user.id
+    )
+      .single();
+    if (contactError) return sendJsonError(res, 500, contactError);
+    if (!contact) return res.status(404).json({ error: "Contact not found." });
 
     const result = await db
       .from("interactions")

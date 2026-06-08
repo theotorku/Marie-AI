@@ -7,7 +7,9 @@ import {
 } from "./routeHelpers.js";
 
 export function registerTemplateRoutes(app, { authenticateToken, requireTier, getDb }) {
-  app.get("/api/templates", authenticateToken, requireTier("gmail"), async (req, res) => {
+  const templateWriteMiddleware = [authenticateToken, requireTier("gmail")];
+
+  app.get("/api/templates", authenticateToken, async (req, res) => {
     const db = getDb();
     const result = await scopeToUser(
       db
@@ -18,7 +20,7 @@ export function registerTemplateRoutes(app, { authenticateToken, requireTier, ge
     return sendListResponse(res, result, "templates");
   });
 
-  app.post("/api/templates", authenticateToken, requireTier("gmail"), async (req, res) => {
+  app.post("/api/templates", ...templateWriteMiddleware, async (req, res) => {
     const { name, category, subject, body } = req.body;
     if (!name || !body) return res.status(400).json({ error: "name and body are required." });
     const db = getDb();
@@ -36,7 +38,7 @@ export function registerTemplateRoutes(app, { authenticateToken, requireTier, ge
     return sendRecordResponse(res, result, "template", { status: 201 });
   });
 
-  app.patch("/api/templates/:id", authenticateToken, async (req, res) => {
+  app.patch("/api/templates/:id", ...templateWriteMiddleware, async (req, res) => {
     const db = getDb();
     const result = await scopeToOwnedRecord(
       db
@@ -50,7 +52,7 @@ export function registerTemplateRoutes(app, { authenticateToken, requireTier, ge
     return sendRecordResponse(res, result, "template", { notFoundMessage: "Template not found." });
   });
 
-  app.delete("/api/templates/:id", authenticateToken, async (req, res) => {
+  app.delete("/api/templates/:id", ...templateWriteMiddleware, async (req, res) => {
     const db = getDb();
     const { error } = await scopeToOwnedRecord(
       db

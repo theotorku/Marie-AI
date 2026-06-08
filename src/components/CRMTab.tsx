@@ -42,28 +42,16 @@ export default function CRMTab({
 
   // New contact form
   const [form, setForm] = useState<{ name: string; company: string; role: string; email: string; phone: string; stage: Contact["stage"]; notes: string }>({ name: "", company: "", role: "", email: "", phone: "", stage: "lead", notes: "" });
-
-  if (!isPro) {
-    return (
-      <div style={{ maxWidth: 600, margin: "0 auto", textAlign: "center", padding: "60px 20px" }}>
-        <div style={{ fontSize: 36, marginBottom: 16 }}>{"\u{1F4C7}"}</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 22, fontWeight: 600, marginBottom: 8 }}>Contacts & Pipeline</h2>
-        <p style={{ fontSize: 13, color: "rgba(232,224,212,0.7)", marginBottom: 24 }}>
-          Track buyers, manage deals, and log interactions. Available on Professional plan.
-        </p>
-        <button onClick={onUpgrade} style={{
-          padding: "10px 24px", borderRadius: 10, border: "none",
-          background: "linear-gradient(135deg, #8B6914, #C4973B)",
-          color: "#1A1611", fontWeight: 700, fontSize: 13, cursor: "pointer",
-        }}>Upgrade — $29/mo</button>
-      </div>
-    );
-  }
+  const readOnly = !isPro;
 
   const filtered = filter === "all" ? contacts : contacts.filter((c) => c.stage === filter);
   const selectedContact = contacts.find((c) => c.id === selected);
 
   const handleAdd = async () => {
+    if (readOnly) {
+      onUpgrade();
+      return;
+    }
     if (!form.name.trim()) return;
     await onAdd(form);
     setForm({ name: "", company: "", role: "", email: "", phone: "", stage: "lead", notes: "" });
@@ -77,6 +65,10 @@ export default function CRMTab({
   };
 
   const handleAddInteraction = async () => {
+    if (readOnly) {
+      onUpgrade();
+      return;
+    }
     if (!newInterSummary.trim() || !selected) return;
     await onAddInteraction(selected, newInterType, newInterSummary.trim());
     const data = await onGetInteractions(selected);
@@ -122,6 +114,7 @@ export default function CRMTab({
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <select
                 value={selectedContact.stage}
+                disabled={readOnly}
                 onChange={(e) => onUpdate(selectedContact.id, { stage: e.target.value as Contact["stage"] })}
                 style={{
                   padding: "6px 12px", borderRadius: 8,
@@ -130,6 +123,7 @@ export default function CRMTab({
                   color: stageInfo?.color || "#C4973B",
                   fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em",
                   cursor: "pointer",
+                  opacity: readOnly ? 0.65 : 1,
                 }}
               >
                 {STAGES.filter((s) => s.value !== "all").map((s) => (
@@ -192,13 +186,13 @@ export default function CRMTab({
           />
           <button
             onClick={handleAddInteraction}
-            disabled={!newInterSummary.trim()}
+            disabled={!newInterSummary.trim() && !readOnly}
             style={{
               padding: "10px 18px", borderRadius: 10, border: "none",
-              background: !newInterSummary.trim() ? "rgba(196,151,59,0.2)" : "linear-gradient(135deg, #8B6914, #C4973B)",
+              background: !newInterSummary.trim() && !readOnly ? "rgba(196,151,59,0.2)" : "linear-gradient(135deg, #8B6914, #C4973B)",
               color: "#1A1611", fontWeight: 700, fontSize: 12, cursor: !newInterSummary.trim() ? "not-allowed" : "pointer",
             }}
-          >Log</button>
+          >{readOnly ? "Upgrade" : "Log"}</button>
         </div>
 
         {/* Interaction timeline */}
@@ -240,12 +234,26 @@ export default function CRMTab({
     <div style={{ maxWidth: 700, margin: "0 auto" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, fontWeight: 600 }}>Contacts</h2>
-        <button onClick={() => setShowNew(!showNew)} style={{
+        <button onClick={() => readOnly ? onUpgrade() : setShowNew(!showNew)} style={{
           padding: "8px 18px", borderRadius: 8, border: "none",
           background: "linear-gradient(135deg, #8B6914, #C4973B)",
           color: "#1A1611", fontWeight: 700, fontSize: 12, cursor: "pointer",
-        }}>{showNew ? "Cancel" : "+ Add Contact"}</button>
+        }}>{readOnly ? "Upgrade to Add" : showNew ? "Cancel" : "+ Add Contact"}</button>
       </div>
+
+      {readOnly && (
+        <div style={{
+          padding: "14px 16px", borderRadius: 12,
+          border: "1px solid rgba(196,151,59,0.16)",
+          background: "rgba(196,151,59,0.06)",
+          color: "rgba(232,224,212,0.75)",
+          fontSize: 12,
+          lineHeight: 1.5,
+          marginBottom: 18,
+        }}>
+          Read-only mode. You can review saved contacts and pipeline history; adding contacts, changing stages, and logging interactions requires Professional.
+        </div>
+      )}
 
       {/* Pipeline summary */}
       <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
@@ -262,7 +270,7 @@ export default function CRMTab({
       </div>
 
       {/* New contact form */}
-      {showNew && (
+      {showNew && !readOnly && (
         <div style={{
           padding: 20, borderRadius: 14, border: "1px solid rgba(196,151,59,0.2)",
           background: "rgba(196,151,59,0.04)", marginBottom: 20,
@@ -336,11 +344,11 @@ export default function CRMTab({
               <div style={{ fontSize: 13, color: "rgba(232,224,212,0.7)", lineHeight: 1.6, maxWidth: 360, margin: "0 auto 20px" }}>
                 Add contacts to manage your pipeline, log interactions, and get AI-powered next-step advice from Marie.
               </div>
-              <button onClick={() => setShowNew(true)} style={{
+              <button onClick={() => readOnly ? onUpgrade() : setShowNew(true)} style={{
                 padding: "10px 24px", borderRadius: 10, border: "none",
                 background: "linear-gradient(135deg, #8B6914, #C4973B)",
                 color: "#1A1611", fontWeight: 700, fontSize: 13, cursor: "pointer",
-              }}>+ Add Your First Contact</button>
+              }}>{readOnly ? "Upgrade to Add Contacts" : "+ Add Your First Contact"}</button>
             </>
           ) : (
             <div style={{ color: "rgba(232,224,212,0.6)", fontSize: 13 }}>No contacts in this stage.</div>
@@ -374,12 +382,19 @@ export default function CRMTab({
                     background: `${stageInfo?.color}15`,
                   }}>{stageInfo?.label}</span>
                   <button
-                    onClick={(e) => { e.stopPropagation(); if (confirm(`Delete ${c.name}?`)) onDelete(c.id); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (readOnly) {
+                        onUpgrade();
+                        return;
+                      }
+                      if (confirm(`Delete ${c.name}?`)) onDelete(c.id);
+                    }}
                     style={{
                       background: "none", border: "none", color: "rgba(232,224,212,0.55)",
                       fontSize: 14, cursor: "pointer", padding: "0 4px",
                     }}
-                  >{"\u2715"}</button>
+                  >{readOnly ? "\u2191" : "\u2715"}</button>
                 </div>
               </div>
             );

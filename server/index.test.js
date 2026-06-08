@@ -570,9 +570,47 @@ describe("server routes", () => {
     });
   });
 
-  it("blocks contacts access for free-tier users", async () => {
+  it("allows downgraded users to read their contacts", async () => {
+    const contactsQuery = {
+      select: vi.fn(() => contactsQuery),
+      eq: vi.fn(() => contactsQuery),
+      order: vi.fn().mockResolvedValue({
+        data: [
+          {
+            id: "contact-1",
+            name: "Buyer Jane",
+            company: "Glow Co",
+            stage: "pitched",
+          },
+        ],
+        error: null,
+      }),
+    };
+    setDbFactories({ contacts: () => contactsQuery });
+
     await withServer(async (baseUrl) => {
       const res = await realFetch(`${baseUrl}/api/contacts`, { headers: authHeaders() });
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({
+        contacts: [
+          {
+            id: "contact-1",
+            name: "Buyer Jane",
+            company: "Glow Co",
+            stage: "pitched",
+          },
+        ],
+      });
+    });
+  });
+
+  it("blocks downgraded users from mutating contacts", async () => {
+    await withServer(async (baseUrl) => {
+      const res = await realFetch(`${baseUrl}/api/contacts/contact-1`, {
+        method: "PATCH",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ stage: "closed" }),
+      });
       expect(res.status).toBe(403);
       expect(await res.json()).toEqual({
         error: "proactiveAgent requires a Professional plan. Upgrade to unlock this feature.",
@@ -620,6 +658,13 @@ describe("server routes", () => {
   });
 
   it("creates an interaction and updates the contact timestamp", async () => {
+    mocks.billing.getUserTier.mockResolvedValue("professional");
+
+    const contactLookupQuery = {
+      select: vi.fn(() => contactLookupQuery),
+      eq: vi.fn(() => contactLookupQuery),
+      single: vi.fn().mockResolvedValue({ data: { id: "contact-1" }, error: null }),
+    };
     const interactionQuery = {
       insert: vi.fn(() => interactionQuery),
       select: vi.fn(() => interactionQuery),
@@ -641,9 +686,12 @@ describe("server routes", () => {
     contactsQuery.eq
       .mockImplementationOnce(() => contactsQuery)
       .mockResolvedValueOnce({ error: null });
+    const contactsFactory = vi.fn()
+      .mockImplementationOnce(() => contactLookupQuery)
+      .mockImplementationOnce(() => contactsQuery);
     setDbFactories({
       interactions: () => interactionQuery,
-      contacts: () => contactsQuery,
+      contacts: contactsFactory,
     });
 
     await withServer(async (baseUrl) => {
@@ -663,6 +711,8 @@ describe("server routes", () => {
           summary: "Sent line sheet",
         },
       });
+      expect(contactLookupQuery.eq).toHaveBeenNthCalledWith(1, "id", "contact-1");
+      expect(contactLookupQuery.eq).toHaveBeenNthCalledWith(2, "user_id", "user-1");
       expect(interactionQuery.insert).toHaveBeenCalledWith({
         contact_id: "contact-1",
         user_id: "user-1",
@@ -678,9 +728,53 @@ describe("server routes", () => {
     });
   });
 
-  it("blocks templates access for free-tier users", async () => {
+  it("allows downgraded users to read their templates", async () => {
+    const templatesQuery = {
+      select: vi.fn(() => templatesQuery),
+      eq: vi.fn(() => templatesQuery),
+      order: vi.fn().mockResolvedValue({
+        data: [
+          {
+            id: "template-1",
+            name: "Buyer Follow-Up",
+            category: "general",
+            subject: "",
+            body: "Checking in",
+            created_at: "2026-03-17T08:00:00.000Z",
+            updated_at: "2026-03-17T08:00:00.000Z",
+          },
+        ],
+        error: null,
+      }),
+    };
+    setDbFactories({ email_templates: () => templatesQuery });
+
     await withServer(async (baseUrl) => {
       const res = await realFetch(`${baseUrl}/api/templates`, { headers: authHeaders() });
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({
+        templates: [
+          {
+            id: "template-1",
+            name: "Buyer Follow-Up",
+            category: "general",
+            subject: "",
+            body: "Checking in",
+            created_at: "2026-03-17T08:00:00.000Z",
+            updated_at: "2026-03-17T08:00:00.000Z",
+          },
+        ],
+      });
+    });
+  });
+
+  it("blocks downgraded users from mutating templates", async () => {
+    await withServer(async (baseUrl) => {
+      const res = await realFetch(`${baseUrl}/api/templates/template-1`, {
+        method: "PATCH",
+        headers: { ...authHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "Updated" }),
+      });
       expect(res.status).toBe(403);
       expect(await res.json()).toEqual({
         error: "gmail requires a Professional plan. Upgrade to unlock this feature.",
@@ -1063,6 +1157,10 @@ describe("server routes", () => {
       if (url.startsWith("http://127.0.0.1:")) return realFetch(input, init);
       return { ok: true, status: 200, json: async () => ({ content: [{ text: "Hi" }] }) };
     }));
+    const insertMessageQuery = {
+      insert: vi.fn().mockResolvedValue({ error: null }),
+    };
+    setDbFactories({ messages: () => insertMessageQuery });
 
     await withServer(async (baseUrl) => {
       const options = {

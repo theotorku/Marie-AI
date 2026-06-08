@@ -26,6 +26,7 @@ import CommandCenter, { getTimeGradient } from "./components/CommandCenter";
 import StudioTab from "./components/StudioTab";
 import MarieScore from "./components/MarieScore";
 import HandsFreeToggle from "./components/HandsFreeToggle";
+import DayOneSetup from "./components/DayOneSetup";
 import { useCRM } from "./hooks/useCRM";
 import { useSlack } from "./hooks/useSlack";
 import { useTemplates } from "./hooks/useTemplates";
@@ -193,6 +194,9 @@ export default function App() {
         @keyframes subtleFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
         @keyframes glowPulse { 0%, 100% { box-shadow: 0 0 0 rgba(196,151,59,0); } 50% { box-shadow: 0 0 20px rgba(196,151,59,0.08); } }
         @keyframes soundWave { 0%, 100% { height: 4px; } 50% { height: 14px; } }
+        @keyframes marieLogoFloat { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.02); } }
+        @keyframes marieLogoHalo { 0%, 100% { opacity: 0.35; transform: scale(0.92); } 50% { opacity: 0.85; transform: scale(1.08); } }
+        @keyframes marieLogoSheen { 0% { transform: translateX(-130%) rotate(24deg); } 48%, 100% { transform: translateX(130%) rotate(24deg); } }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -241,6 +245,50 @@ export default function App() {
         /* Sidebar nav hover micro-animation */
         .nav-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important; }
         .nav-btn:hover { background: rgba(196,151,59,0.1) !important; transform: scale(1.05); }
+
+        .marie-logo-shell {
+          position: relative;
+          width: 46px;
+          height: 46px;
+          display: grid;
+          place-items: center;
+          isolation: isolate;
+          border-radius: 14px;
+          overflow: hidden;
+          animation: marieLogoFloat 4.8s ease-in-out infinite;
+        }
+        .marie-logo-shell::before {
+          content: "";
+          position: absolute;
+          inset: 3px;
+          z-index: -1;
+          border-radius: inherit;
+          background: radial-gradient(circle, rgba(212,168,75,0.28), rgba(196,151,59,0.08) 52%, transparent 72%);
+          animation: marieLogoHalo 3.6s ease-in-out infinite;
+        }
+        .marie-logo-shell::after {
+          content: "";
+          position: absolute;
+          top: -18%;
+          bottom: -18%;
+          width: 18px;
+          background: linear-gradient(90deg, transparent, rgba(255,247,234,0.34), transparent);
+          animation: marieLogoSheen 6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+        }
+        .marie-logo-mark {
+          width: 40px;
+          height: 40px;
+          object-fit: contain;
+          border-radius: 10px;
+          filter: drop-shadow(0 0 12px rgba(196,151,59,0.16));
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .marie-logo-shell,
+          .marie-logo-shell::before,
+          .marie-logo-shell::after {
+            animation: none;
+          }
+        }
 
         /* Section accent tints on hover */
         .accent-emails:hover { border-color: rgba(232,160,191,0.3) !important; }
@@ -292,11 +340,11 @@ export default function App() {
           flexShrink: 0,
         }}
       >
-        <div style={{ marginBottom: 20 }}>
+        <div className="marie-logo-shell" style={{ marginBottom: 20 }}>
           <img
             src="/Marie%20AI%202.png"
             alt="Marie AI"
-            style={{ width: 40, height: 40, objectFit: "contain", borderRadius: 10 }}
+            className="marie-logo-mark"
           />
         </div>
         {TABS.map((tab) => (
@@ -406,6 +454,19 @@ export default function App() {
           {/* Home — Command Center */}
           {activeTab === "home" && (
             <div style={{ maxWidth: 800, margin: "0 auto", width: "100%" }}>
+              {(crm.contacts.length === 0 || taskStore.tasks.length === 0 || templateStore.templates.length === 0 || (marieScore.score ?? 0) === 0) && (
+                <DayOneSetup
+                  contactsCount={crm.contacts.length}
+                  openTasksCount={taskStore.tasks.filter((t) => !t.done).length}
+                  templatesCount={templateStore.templates.length}
+                  marieScore={marieScore.score}
+                  isPro={billing.tier === "professional"}
+                  onNavigate={setActiveTab}
+                  onStartContact={() => setActiveTab("contacts")}
+                  onStartTask={() => setActiveTab("tasks")}
+                  onStartTemplate={() => setActiveTab("templates")}
+                />
+              )}
               <CommandCenter
                 userName={auth.user.name}
                 notifications={notifs.notifications}
@@ -644,6 +705,7 @@ export default function App() {
               }}
               isPro={billing.tier === "professional"}
               onUpgrade={billing.upgrade}
+              onNavigate={setActiveTab}
             />
           )}
 
@@ -660,6 +722,20 @@ export default function App() {
           {activeTab === "tasks" && (
             <div style={{ maxWidth: 600, margin: "0 auto" }}>
               <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, fontWeight: 600, marginBottom: 24 }}>Daily Tasks</h2>
+              {taskStore.tasks.length === 0 && (
+                <DayOneSetup
+                  contactsCount={crm.contacts.length}
+                  openTasksCount={0}
+                  templatesCount={templateStore.templates.length}
+                  marieScore={marieScore.score}
+                  isPro={billing.tier === "professional"}
+                  onNavigate={setActiveTab}
+                  onStartContact={() => setActiveTab("contacts")}
+                  onStartTask={() => setNewTask("Follow up with one priority buyer")}
+                  onStartTemplate={() => setActiveTab("templates")}
+                  compact
+                />
+              )}
               <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
                 <input
                   value={newTask}
@@ -703,9 +779,15 @@ export default function App() {
               <div style={{ marginBottom: 12, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(232,224,212,0.65)", fontWeight: 600 }}>
                 {taskStore.tasks.filter((t) => !t.done).length} remaining · {taskStore.tasks.filter((t) => t.done).length} complete
               </div>
-              {sortedTasks.map((task) => (
-                <TaskItem key={task.id} task={task} onToggle={() => taskStore.toggleTask(task.id)} onDelete={() => taskStore.deleteTask(task.id)} />
-              ))}
+              {sortedTasks.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "36px 20px", color: "rgba(232,224,212,0.68)", fontSize: 13, lineHeight: 1.6 }}>
+                  Add one concrete next action, then mark it complete when done. Marie Score starts moving once your day has real activity.
+                </div>
+              ) : (
+                sortedTasks.map((task) => (
+                  <TaskItem key={task.id} task={task} onToggle={() => taskStore.toggleTask(task.id)} onDelete={() => taskStore.deleteTask(task.id)} />
+                ))
+              )}
             </div>
           )}
 
