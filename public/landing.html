@@ -71,7 +71,7 @@ img{display:block;max-width:100%}
 .btn-primary:hover{background:#E3C781}
 .btn-secondary{border:1px solid var(--line-gold);color:var(--cream)}
 .btn-secondary:hover{border-color:var(--gold-2);background:rgba(196,151,59,.08)}
-.hero{min-height:92svh;position:relative;display:grid;align-items:end;padding:120px clamp(20px,4vw,56px) 72px;isolation:isolate;overflow:hidden}
+.hero{min-height:92svh;position:relative;display:grid;align-items:center;padding:96px clamp(20px,4vw,56px);isolation:isolate;overflow:hidden}
 .hero::before{content:"";position:absolute;inset:-2.5%;z-index:-2;background:
   radial-gradient(120% 90% at 82% 30%,rgba(28,21,16,.9) 0%,rgba(13,11,9,0) 55%),
   linear-gradient(135deg,#0D0B09 0%,#1C1510 54%,#070605 100%);transform-origin:78% 46%;animation:hero-drift 24s var(--ease) infinite}
@@ -80,11 +80,11 @@ img{display:block;max-width:100%}
   radial-gradient(circle at 88% 68%,rgba(135,147,109,.14),transparent 26%),
   linear-gradient(105deg,transparent 0%,rgba(255,247,234,.055) 43%,transparent 58%),
   linear-gradient(0deg,var(--ink) 0%,rgba(13,11,9,0) 32%);background-size:120% 120%,120% 120%,180% 100%,100% 100%;background-position:70% 34%,88% 68%,-90% 0,0 0;animation:hero-light 18s ease-in-out infinite;pointer-events:none}
-.hero-grid{display:block;width:100%}
+.hero-grid{display:block;width:100%;text-align:center}
 .kicker{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.22em;color:var(--gold-2);margin-bottom:18px}
-h1{font-family:var(--display);font-size:clamp(4rem,9vw,8.3rem);line-height:.88;font-weight:700;letter-spacing:0;max-width:700px}
-.hero-copy{max-width:500px;color:var(--muted);font-size:clamp(17px,1.5vw,20px);margin:24px 0 30px}
-.hero-actions{display:flex;flex-wrap:wrap;gap:12px}
+h1{font-family:var(--display);font-size:clamp(4rem,9vw,8.3rem);line-height:.88;font-weight:700;letter-spacing:0;max-width:700px;margin:0 auto}
+.hero-copy{max-width:500px;color:var(--muted);font-size:clamp(17px,1.5vw,20px);margin:24px auto 30px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
 .hero-note{margin-top:22px;color:var(--faint);font-size:13px}
 .pulse-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(13,11,9,.14);border:1px solid rgba(13,11,9,.14);margin-bottom:58px}
 .pulse-item{background:rgba(255,247,234,.74);padding:22px}
